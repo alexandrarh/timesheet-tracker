@@ -209,3 +209,4 @@ __marimo__/
 # Local files
 .vscode/
 .DS_Store
+secrets.md
