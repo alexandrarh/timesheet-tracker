@@ -1,10 +1,27 @@
 import requests
+import os
+import sys
 from datetime import datetime, timedelta
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Optional
+import json
+from urllib.parse import urlencode
+
+class TimeSolveAuth:
+    """Handles OAuth2 authentication for TimeSolv API."""
+    def __init__(self, client_id: str, client_secret: str, redirect_uri: str):
+        pass
+
+    def get_authorization_url(self, state: str = "timecard_checker") -> str:
+        """Generate the authorization URL for user to approve access."""
+        pass
+
+    def get_access_token(self, auth_code: str) -> str:
+        """Exchange authorization code for access token."""
+        pass
 
 class TimeSolvAPI:
+    """API for retrieving necessary TimeSolv timesheet data."""
     def __init__(self, access_token: str):
-        """Initialize the TimeSolvAPI with the provided access token."""
         self.base_url = "https://api.timesolv.com/v1"
         self.headers = {
             "Authorization": f"Bearer {access_token}",
