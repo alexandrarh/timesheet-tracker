@@ -102,9 +102,11 @@ def search_timecards(access_token: str, start_date: str, end_date: str):
     if response.status_code != 200:
         print(f"Error fetching time cards: {response.status_code} - {response.text}")
         return 1
+    
+    timecard_json = json.dumps(response.json(), indent=2)
+    timecard_list = json.loads(timecard_json)['TimeCards']
 
-    print(f"Status Code: {response.status_code}")
-    print(f"Response: {json.dumps(response.json(), indent=2)}")
+    return timecard_list
 
 def main():
     access_data = {
@@ -123,8 +125,6 @@ def main():
     # print(firm_users)
 
     # Testing search timecards
-    # start_date = "2025-10-27"
-    # end_date = "2025-10-31"
     def get_work_week_dates():
         today = date.today()
     
@@ -137,7 +137,8 @@ def main():
         return monday.strftime('%Y-%m-%d'), friday.strftime('%Y-%m-%d')
 
     start_date, end_date = get_work_week_dates()
-    search_timecards(access_token, start_date, end_date)
+    timecards = search_timecards(access_token, start_date, end_date)
+    print(timecards)
 
 if __name__ == "__main__":
     main()
