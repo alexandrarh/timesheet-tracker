@@ -63,6 +63,8 @@ def get_firm_users(access_token: str) -> List[Dict] | int:
     # print(f"Status Code: {response.status_code}")
     # print(f"Response: {json.dumps(response.json(), indent=2)}")
 
+def 
+
 def main():
     access_data = {
         "client_id": TIMESOLV_CLIENT_ID,
