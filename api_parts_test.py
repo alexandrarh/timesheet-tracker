@@ -75,11 +75,6 @@ def search_timecards(access_token: str, start_date: str, end_date: str):
 
     payload = {
         "Criteria": [
-             {
-                "FieldName": "FirmUserId",
-                "Operator": "=",
-                "Value": 92915      # My user ID
-            },
             {
                 "FieldName": "Date",
                 "Operator": ">=",
