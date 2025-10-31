@@ -1,16 +1,17 @@
 from timesolv_api import TimeSolvAPI, TimeSolveAuth
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+import logging
 import datetime
 import time
-from dotenv import load_dotenv
 import os
+import msal
+import json
+from dotenv import load_dotenv
  
 # Loading environment variables from a .env file
 load_dotenv()
 
 # Environment variables for TimeSolv API
+# NOTE: I will need to move these parts into production repo, and then call in .yaml
 TIMESOLV_CLIENT_ID = os.getenv('TIMESOLV_CLIENT_ID')
 TIMESOLV_CLIENT_SECRET = os.getenv('TIMESOLV_CLIENT_SECRET')
 TIMESOLV_AUTH_CODE = os.getenv('TIMESOLV_AUTH_CODE')
