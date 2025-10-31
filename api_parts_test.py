@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Set, Optional
 import json
 from urllib.parse import urlencode
-
 from dotenv import load_dotenv
  
 # Loading environment variables from a .env file
