@@ -9,15 +9,40 @@ from urllib.parse import urlencode
 class TimeSolveAuth:
     """Handles OAuth2 authentication for TimeSolv API."""
     def __init__(self, client_id: str, client_secret: str, redirect_uri: str):
-        pass
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.redirect_uri = redirect_uri
+        self.auth_base_url = "https://apps.timesolv.com/App/Authorize.aspx"
+        self.token_url = "https://apps.timesolv.com/Services/rest/oAuth2V1/Token"
 
     def get_authorization_url(self, state: str = "timecard_checker") -> str:
         """Generate the authorization URL for user to approve access."""
-        pass
+        params = {
+            "redirect_uri": self.redirect_uri,
+            "client_id": self.client_id,
+            "state": state
+        }
+        return f"{self.auth_base_url}?{urlencode(params)}"
 
     def get_access_token(self, auth_code: str) -> str:
         """Exchange authorization code for access token."""
-        pass
+        data = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "grant_type": "authorization_code",
+            "code": auth_code,
+            "redirect_uri": self.redirect_uri
+        }
+        
+        response = requests.post(
+            self.token_url,
+            data=data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"}
+        )
+        response.raise_for_status()
+        
+        result = response.json()
+        return result["AccessToken"]
 
 class TimeSolvAPI:
     """API for retrieving necessary TimeSolv timesheet data."""
