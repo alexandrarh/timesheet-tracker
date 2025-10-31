@@ -64,7 +64,7 @@ class TimeSolvAPI:
         }
 
         # Make the request
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests.post(url, headers=self.headers, json=payload)
         
         if response.status_code != 200:
             return f"Error fetching firm users: {response.status_code} - {response.text}"
