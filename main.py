@@ -1,6 +1,6 @@
 from timesolv_api import TimeSolvAPI, TimeSolveAuth
 import logging
-import datetime import date, timedelta
+from datetime import date, timedelta
 import time
 import os
 import msal
@@ -56,6 +56,18 @@ def main():
     #     print(f"Fetched {len(firm_users)} firm users.")
     #     for user in firm_users:
     #         print(f"User ID: {user['Id']}, Name: {user['FirstName']} {user['LastName']}")
+
+    # Fetch timecards for the current work week
+    start_date, end_date = get_work_week_dates()
+    timecards = timesolv_api.search_timecards(start_date=start_date, end_date=end_date)
+
+    # TODO: Ditto
+    # if isinstance(timecards, str):
+    #     print(f"Error fetching timecards: {timecards}")
+    # else:
+    #     print(f"Fetched {len(timecards)} timecards.")
+    #     for card in timecards:
+    #         print(f"Timecard ID: {card['Id']}, User ID: {card['FirmUserId']}, Date: {card['Date']}")
 
 if __name__ == "__main__":
     main()
