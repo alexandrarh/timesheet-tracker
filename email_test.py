@@ -9,8 +9,7 @@ load_dotenv()
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 TENANT_ID = os.getenv('TENANT_ID')
-
-SENDER_EMAIL = 'ah@mcnulty.cpa'
+SENDER_EMAIL = os.getenv('SENDER_EMAIL')
 
 def get_access_token():
     """Authenticate with Microsoft Graph API to get token."""
@@ -83,7 +82,7 @@ def send_email(to_email, subject, body, body_type='Text'):
 def main():
     # print(CLIENT_ID)
     send_email(
-        to_email='ah@mcnulty.cpa',
+        to_email=SENDER_EMAIL,
         subject='Test Email',
         body='This is a test email sent from the Microsoft Graph API.'
     )
