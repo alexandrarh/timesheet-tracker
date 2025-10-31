@@ -1,4 +1,4 @@
-from timesolv_api import TimeSolvAPI
+from timesolv_api import TimeSolvAPI, TimeSolveAuth
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
