@@ -49,6 +49,30 @@ def main():
     # Fetch firm users
     firm_users = timesolv_api.get_all_firm_users()
 
+    # Get dates for range (current work week)
+    start_date, end_date = get_work_week_dates()
+    print(f"Fetching timecards from {start_date} to {end_date}...")     # TODO: Change to logging
+
+    # Create dictionary containing userId and count of timecards -> Count timecards per user in range
+    user_timecard_count = {}
+    for user in firm_users:
+        timecards = timesolv_api.search_timecards(
+            start_date=start_date,
+            end_date=end_date,
+            firm_user_id=user['Id']
+        )
+
+        if isinstance(timecards, str):
+            user_timecard_count[user['Id']] = 0
+        else:
+            user_timecard_count[user['Id']] = len(timecards)
+
+    #     # TODO: Add logging for the error handling here
+    #     if isinstance(timecards, str):
+    #         user_timecard_count[user['Id']] = 0
+    #     else:
+    #         user_timecard_count[user['Id']] = len(timecards)
+
     # TODO: Add logging and error handling as needed
     # if isinstance(firm_users, str):
     #     print(f"Error fetching firm users: {firm_users}")
@@ -58,16 +82,7 @@ def main():
     #         print(f"User ID: {user['Id']}, Name: {user['FirstName']} {user['LastName']}")
 
     # Fetch timecards for the current work week
-    start_date, end_date = get_work_week_dates()
-    timecards = timesolv_api.search_timecards(start_date=start_date, end_date=end_date)
-
-    # TODO: Ditto
-    # if isinstance(timecards, str):
-    #     print(f"Error fetching timecards: {timecards}")
-    # else:
-    #     print(f"Fetched {len(timecards)} timecards.")
-    #     for card in timecards:
-    #         print(f"Timecard ID: {card['Id']}, User ID: {card['FirmUserId']}, Date: {card['Date']}")
+    # timecards = timesolv_api.search_timecards(start_date=start_date, end_date=end_date)
 
 if __name__ == "__main__":
     main()

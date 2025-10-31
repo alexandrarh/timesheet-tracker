@@ -77,12 +77,13 @@ class TimeSolvAPI:
         
         return firm_list
 
-    def search_timecards(self, start_date: str, end_date: str) -> List[Dict] | str:
+    def search_timecards(self, start_date: str, end_date: str, firm_user_id: int) -> List[Dict] | str:
         """Search for timecards within the specified date range.
 
         Args:
         - start_date (str): The start date for the search (YYYY-MM-DD).
         - end_date (str): The end date for the search (YYYY-MM-DD).
+        - firm_user_id (int): The ID of the firm user whose timecards are to be searched.
 
         Returns:
         - A list of dictionaries containing timecard details.
@@ -92,6 +93,11 @@ class TimeSolvAPI:
 
         payload = {
             "Criteria": [
+                {
+                    "FieldName": "FirmUserId",
+                    "Operator": "=",
+                    "Value": firm_user_id
+                },
                 {
                     "FieldName": "Date",
                     "Operator": ">=",
@@ -114,16 +120,8 @@ class TimeSolvAPI:
         if response.status_code != 200:
             return f"Error fetching time cards: {response.status_code} - {response.text}"
         
-        timecard_json = json.dumps(response.json(), indent=2)
-        timecard_list = json.loads(timecard_json)['TimeCards']
+        response_data = response.json()
+        timecard_list = response_data.get('TimeCards', [])  # Return empty list if key doesn't exist
 
         return timecard_list
-
-    def check_timecard_status(self, start_date: str, end_date: str) -> Dict:
-        """Checks which employees have submitted timecards for the given range
-
-        Returns:
-        - Dictionary containing employee timecard status and information.
-        """
-        pass
     
