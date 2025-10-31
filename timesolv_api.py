@@ -5,16 +5,6 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Set, Optional
 import json
 from urllib.parse import urlencode
-from dotenv import load_dotenv
- 
-# Loading environment variables from a .env file
-load_dotenv()
-
-# Environment variables for TimeSolv API
-TIMESOLV_CLIENT_ID = os.getenv('TIMESOLV_CLIENT_ID')
-TIMESOLV_CLIENT_SECRET = os.getenv('TIMESOLV_CLIENT_SECRET')
-TIMESOLV_AUTH_CODE = os.getenv('TIMESOLV_AUTH_CODE')
-REDIRECT_URI = os.getenv('REDIRECT_URI')
 
 class TimeSolveAuth:
     """Handles OAuth2 authentication for TimeSolv API."""
