@@ -25,6 +25,7 @@ import os
 - Log errors and codes returned from API class file
 - Incorporate current day (checked, see if can do auto)
 - Gets users who didn't log in time, sends them email
+    - Let's get count of users time card (how many did they submit) -> number should be 5 arbitrary?
     - Not sure what other form of communication to remind that will be just Internet based
 
 ### Workflow file
