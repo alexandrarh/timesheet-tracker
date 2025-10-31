@@ -1,7 +1,7 @@
 import requests
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 from typing import List, Dict, Set, Optional
 import json
 from urllib.parse import urlencode
@@ -63,7 +63,48 @@ def get_firm_users(access_token: str) -> List[Dict] | int:
     # print(f"Status Code: {response.status_code}")
     # print(f"Response: {json.dumps(response.json(), indent=2)}")
 
-def 
+# List[Dict] | int
+# start_date: str, end_date: str
+def search_timecards(access_token: str, start_date: str, end_date: str):
+    """Search timecards within a specified date range."""
+    url = 'https://apps.timesolv.com/Services/rest/oauth2v1/timecardSearch'
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json'
+    }
+
+    # {
+    #             "FieldName": "FirmUserId",
+    #             "Operator": "=",
+    #             "Value": 92915      # My user ID
+    # }
+    payload = {
+        "Criteria": [
+            {
+                "FieldName": "Date",
+                "Operator": ">=",
+                "Value": start_date
+            },
+            {
+                "FieldName": "Date",
+                "Operator": "<=",
+                "Value": end_date
+            }
+        ],
+        "OrderBy": "Date",
+        "SortOrderAscending": 1,
+        "PageSize": 1000,
+        "PageNumber": 1
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+
+    if response.status_code != 200:
+        print(f"Error fetching time cards: {response.status_code} - {response.text}")
+        return 1
+
+    print(f"Status Code: {response.status_code}")
+    print(f"Response: {json.dumps(response.json(), indent=2)}")
 
 def main():
     access_data = {
@@ -79,7 +120,24 @@ def main():
 
     # Testing get all firm users
     firm_users = get_firm_users(access_token)
-    print(firm_users)
+    # print(firm_users)
+
+    # Testing search timecards
+    # start_date = "2025-10-27"
+    # end_date = "2025-10-31"
+    def get_work_week_dates():
+        today = date.today()
+    
+        # Get Monday of current week (weekday: 0=Monday, 6=Sunday)
+        monday = today - timedelta(days=today.weekday())
+        
+        # Get Friday of current week (Monday + 4 days)
+        friday = monday + timedelta(days=4)
+        
+        return monday.strftime('%Y-%m-%d'), friday.strftime('%Y-%m-%d')
+
+    start_date, end_date = get_work_week_dates()
+    search_timecards(access_token, start_date, end_date)
 
 if __name__ == "__main__":
     main()
