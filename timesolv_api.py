@@ -33,6 +33,9 @@ class TimeSolveAuth:
 class TimeSolvAPI:
     """API for retrieving necessary TimeSolv timesheet data."""
     def __init__(self, access_token: str):
+        self.page_size = 100
+        self.page_number = 1
+        self.sort_asc = 0
         self.headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json"
@@ -51,9 +54,9 @@ class TimeSolvAPI:
         # Payload to fetch active users
         payload = {
             "OrderBy": "Id",
-            "SortOrderAscending": 0,
-            "PageSize": 100,
-            "PageNumber": 1,
+            "SortOrderAscending": self.sort_asc,
+            "PageSize": self.page_size,
+            "PageNumber": self.page_number,
             "Criteria": [
                 {
                     "FieldName": "UserStatus",
