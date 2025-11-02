@@ -33,9 +33,6 @@ class TimeSolveAuth:
 class TimeSolvAPI:
     """API for retrieving necessary TimeSolv timesheet data."""
     def __init__(self, access_token: str):
-        self.page_size = 100
-        self.page_number = 1
-        self.sort_asc = 0
         self.headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json"
@@ -51,30 +48,46 @@ class TimeSolvAPI:
 
         url = 'https://apps.timesolv.com/Services/rest/oauth2v1/firmUserSearch'
 
-        # Payload to fetch active users
-        payload = {
-            "OrderBy": "Id",
-            "SortOrderAscending": self.sort_asc,
-            "PageSize": self.page_size,
-            "PageNumber": self.page_number,
-            "Criteria": [
-                {
-                    "FieldName": "UserStatus",
-                    "Operator": "=",
-                    "Value": "Active"
-                }
-            ]
-        }
+        firm_list = []
+        page_size = 100
+        page_number = 1
 
-        # Make the request
-        response = requests.post(url, headers=self.headers, json=payload)
-        
-        if response.status_code != 200:
-            return f"Error fetching firm users: {response.status_code} - {response.text}"
-        
-        firm_json = json.dumps(response.json(), indent=2)
-        firm_list = json.loads(firm_json)['FirmUsers']
-        
+        # Loop to go thru pages
+        while True:
+            # Payload to fetch active users
+            payload = {
+                "OrderBy": "Id",
+                "SortOrderAscending": 0,
+                "PageSize": page_size,
+                "PageNumber": page_number,
+                "Criteria": [
+                    {
+                        "FieldName": "UserStatus",
+                        "Operator": "=",
+                        "Value": "Active"
+                    }
+                ]
+            }
+
+            # Make the request
+            response = requests.post(url, headers=self.headers, json=payload).json()
+
+            if response.get("ErrorCode"):
+                return f"Error fetching firm users: {response['ErrorCode']} - {response['ErrorMessage']}"
+
+            # Extract user information
+            users = response.get("FirmUsers", [])
+            if not users:
+                break
+
+            # Append users to firm list
+            firm_list.extend(users)
+
+            if len(users) < page_size:
+                break
+            
+            page_number += 1
+            
         return firm_list
 
     def search_timecards(self, start_date: str, end_date: str, firm_user_id: int) -> List[Dict] | str:
@@ -90,38 +103,49 @@ class TimeSolvAPI:
         """
 
         url = 'https://apps.timesolv.com/Services/rest/oauth2v1/timecardSearch'
+        page_size = 100
+        page_number = 1
+        timecard_list = []
 
-        payload = {
-            "Criteria": [
-                {
-                    "FieldName": "FirmUserId",
-                    "Operator": "=",
-                    "Value": firm_user_id
-                },
-                {
-                    "FieldName": "Date",
-                    "Operator": ">=",
-                    "Value": start_date
-                },
-                {
-                    "FieldName": "Date",
-                    "Operator": "<=",
-                    "Value": end_date
-                }
-            ],
-            "OrderBy": "Date",
-            "SortOrderAscending": 1,
-            "PageSize": self.page_size,
-            "PageNumber": self.page_number
-        }
+        while True:
+            payload = {
+                "Criteria": [
+                    {
+                        "FieldName": "FirmUserId",
+                        "Operator": "=",
+                        "Value": firm_user_id
+                    },
+                    {
+                        "FieldName": "Date",
+                        "Operator": ">=",
+                        "Value": start_date
+                    },
+                    {
+                        "FieldName": "Date",
+                        "Operator": "<=",
+                        "Value": end_date
+                    }
+                ],
+                "OrderBy": "Date",
+                "SortOrderAscending": 1,
+                "PageSize": page_size,
+                "PageNumber": page_number
+            }
 
-        response = requests.post(url, headers=self.headers, json=payload)
+            response = requests.post(url, headers=self.headers, json=payload).json()
 
-        if response.status_code != 200:
-            return f"Error fetching time cards: {response.status_code} - {response.text}"
-        
-        response_data = response.json()
-        timecard_list = response_data.get('TimeCards', [])  # Return empty list if key doesn't exist
+            if response.get("ErrorCode"):
+                return f"Error fetching time cards: {response['ErrorCode']} - {response['ErrorMessage']}"
+
+            timecards = response.get("TimeCards", [])
+            if not timecards:
+                break
+
+            timecard_list.extend(timecards)
+            if len(timecards) < page_size:
+                break
+
+            page_number += 1
 
         return timecard_list
     
