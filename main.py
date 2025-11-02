@@ -5,6 +5,7 @@ import time
 import os
 import msal
 import json
+import pandas as pd
 from dotenv import load_dotenv
  
 # Loading environment variables from a .env file
@@ -17,7 +18,7 @@ TIMESOLV_CLIENT_SECRET = os.getenv('TIMESOLV_CLIENT_SECRET')
 TIMESOLV_AUTH_CODE = os.getenv('TIMESOLV_AUTH_CODE')
 REDIRECT_URI = os.getenv('REDIRECT_URI')
 
-def get_work_week_dates():
+def get_start_and_end_week_dates():
     """Get the start (Monday) and end (Friday) dates of the current work week.
     
     Returns:
@@ -32,6 +33,20 @@ def get_work_week_dates():
     friday = monday + timedelta(days=4)
     
     return monday.strftime('%Y-%m-%d'), friday.strftime('%Y-%m-%d')
+
+def get_work_week_dates():
+    """Get the start (Monday) and end (Friday) dates of the current work week.
+
+    Returns:
+    - List of dates as strings in 'YYYY-MM-DD' format.
+    """
+    today = date.today()
+    monday = today - timedelta(days=today.weekday())
+    
+    # Generate all 5 work days
+    work_week = [monday + timedelta(days=i) for i in range(5)]
+    
+    return [day.strftime('%Y-%m-%d') for day in work_week]
 
 def main():
     # Obtain access token
@@ -50,28 +65,63 @@ def main():
     firm_users = timesolv_api.get_all_firm_users()
 
     # Get dates for range (current work week)
-    start_date, end_date = get_work_week_dates()
+    start_date, end_date = get_start_and_end_week_dates()
     print(f"Fetching timecards from {start_date} to {end_date}...")     # TODO: Change to logging
 
-    # Create dictionary containing userId and count of timecards -> Count timecards per user in range
-    user_timecard_count = {}
+    # NOTE: two appoaches
+    # NOTE First approach: Create dictionary containing userId and count of timecards -> Count timecards per user in range
+    # user_timecard_count = {}
+    # for user in firm_users:
+    #     timecards = timesolv_api.search_timecards(
+    #         start_date=start_date,
+    #         end_date=end_date,
+    #         firm_user_id=user['Id']
+    #     )
+
+    #     if isinstance(timecards, str):
+    #         user_timecard_count[user['Id']] = 0
+    #     else:
+    #         user_timecard_count[user['Id']] = len(timecards)
+
+    # print("User Timecard Counts for the week:")
+    # for user_id, count in user_timecard_count.items():
+    #     print(f"User ID: {user_id}, Timecard Count: {count}")
+
+    # NOTE Second approach: Create dataframe that contains user ID and dates with submission of timecard for each day (0 for no submission, 1 for submission)
+    column_list = ['UserId'] + get_work_week_dates()
+    timecard_tracker_df = pd.DataFrame(columns=column_list)
+
+    # Iterate through firm users and populate dataframe
     for user in firm_users:
+        timecard_row = {'UserId': user['Id']}
         timecards = timesolv_api.search_timecards(
             start_date=start_date,
             end_date=end_date,
             firm_user_id=user['Id']
         )
 
-        if isinstance(timecards, str):
-            user_timecard_count[user['Id']] = 0
-        else:
-            user_timecard_count[user['Id']] = len(timecards)
+        # Initialize all dates to 0 (no submission)
+        for date_str in get_work_week_dates():
+            timecard_row[date_str] = 0
 
-    #     # TODO: Add logging for the error handling here
-    #     if isinstance(timecards, str):
-    #         user_timecard_count[user['Id']] = 0
-    #     else:
-    #         user_timecard_count[user['Id']] = len(timecards)
+        # Mark dates with submissions as 1
+        if not isinstance(timecards, str):
+            for tc in timecards:
+                tc_date = tc.get('Date')
+                if tc_date in timecard_row:
+                    timecard_row[tc_date] = 1
+
+        # Append row to dataframe - convert dict to DataFrame first
+        timecard_tracker_df = pd.concat([timecard_tracker_df, pd.DataFrame([timecard_row])], ignore_index=True)
+
+    # print("Timecard Submission Tracker DataFrame:")
+    # print(timecard_tracker_df.tail())
+
+    # TODO: Add logging for the error handling here
+    # if isinstance(timecards, str):
+    #     user_timecard_count[user['Id']] = 0
+    # else:
+    #     user_timecard_count[user['Id']] = len(timecards)
 
     # TODO: Add logging and error handling as needed
     # if isinstance(firm_users, str):
