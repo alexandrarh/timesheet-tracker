@@ -33,30 +33,44 @@ def get_firm_users(access_token: str) -> List[Dict] | int:
         'Content-Type': 'application/json'
     }
 
-    payload = {
-        "OrderBy": "Id",
-        "SortOrderAscending": 0,
-        "PageSize": 100,
-        "PageNumber": 1,
-        "Criteria": [
-            {
-                "FieldName": "UserStatus",
-                "Operator": "=",
-                "Value": "Active"
-            }
-        ]
-    }
+    firm_list = []
+    page_size = 100
+    page_number = 1
 
-    # Make the request
-    response = requests.post(url, headers=headers, json=payload)
-    
-    if response.status_code != 200:
-        print(f"Error fetching firm users: {response.status_code} - {response.text}")
-        return 1
-    
-    firm_json = json.dumps(response.json(), indent=2)
-    firm_list = json.loads(firm_json)['FirmUsers']
-    
+    # Loop to go thru pages
+    while True:
+        # Payload to fetch active users
+        payload = {
+            "OrderBy": "Id",
+            "SortOrderAscending": 0,
+            "PageSize": page_size,
+            "PageNumber": page_number,
+            "Criteria": [
+                {
+                    "FieldName": "UserStatus",
+                    "Operator": "=",
+                    "Value": "Active"
+                }
+            ]
+        }
+
+        # Make the request
+        response = requests.post(url, headers=headers, json=payload).json()
+
+        if response.get("ErrorCode"):
+            return f"Error fetching firm users: {response['ErrorCode']} - {response['ErrorMessage']}"
+
+        users = response.get("FirmUsers", [])
+        if not users:
+            break
+
+        firm_list.extend(users)
+
+        if len(users) < page_size:
+            break
+        
+        page_number += 1
+        
     return firm_list
 
     # Check the result
@@ -117,7 +131,7 @@ def main():
 
     # Testing get all firm users
     firm_users = get_firm_users(access_token)
-    # print(firm_users)
+    print(firm_users)
 
     # Testing search timecards
     def get_work_week_dates():
@@ -131,9 +145,9 @@ def main():
         
         return monday.strftime('%Y-%m-%d'), friday.strftime('%Y-%m-%d')
 
-    start_date, end_date = get_work_week_dates()
-    timecards = search_timecards(access_token, start_date, end_date)
-    print(timecards)
+    # start_date, end_date = get_work_week_dates()
+    # timecards = search_timecards(access_token, start_date, end_date)
+    # print(timecards)
 
 if __name__ == "__main__":
     main()
