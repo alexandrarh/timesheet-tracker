@@ -68,27 +68,9 @@ def main():
     start_date, end_date = get_start_and_end_week_dates()
     print(f"Fetching timecards from {start_date} to {end_date}...")     # TODO: Change to logging
 
-    # NOTE: two appoaches
-    # NOTE First approach: Create dictionary containing userId and count of timecards -> Count timecards per user in range
-    # user_timecard_count = {}
-    # for user in firm_users:
-    #     timecards = timesolv_api.search_timecards(
-    #         start_date=start_date,
-    #         end_date=end_date,
-    #         firm_user_id=user['Id']
-    #     )
-
-    #     if isinstance(timecards, str):
-    #         user_timecard_count[user['Id']] = 0
-    #     else:
-    #         user_timecard_count[user['Id']] = len(timecards)
-
-    # print("User Timecard Counts for the week:")
-    # for user_id, count in user_timecard_count.items():
-    #     print(f"User ID: {user_id}, Timecard Count: {count}")
-
-    # NOTE Second approach: Create dataframe that contains user ID and dates with submission of timecard for each day (0 for no submission, 1 for submission)
-    column_list = ['UserId'] + get_work_week_dates()
+    # Create dataframe that contains user ID and dates with submission of timecard for each day
+    work_week_dates = get_work_week_dates()
+    column_list = ['UserId'] + work_week_dates
     timecard_tracker_df = pd.DataFrame(columns=column_list)
 
     # Iterate through firm users and populate dataframe
@@ -101,7 +83,7 @@ def main():
         )
 
         # Initialize all dates to 0 (no submission)
-        for date_str in get_work_week_dates():
+        for date_str in work_week_dates:
             timecard_row[date_str] = 0
 
         # Mark dates with submissions as 1
@@ -115,7 +97,25 @@ def main():
         timecard_tracker_df = pd.concat([timecard_tracker_df, pd.DataFrame([timecard_row])], ignore_index=True)
 
     # print("Timecard Submission Tracker DataFrame:")
-    # print(timecard_tracker_df.tail())
+    # print(timecard_tracker_df)
+
+    # Create dictionary containing userId and dates with no submissions
+    user_no_submission_dates = {}
+    for _, row in timecard_tracker_df.iterrows():
+        no_submission_dates = [date for date in work_week_dates if row[date] == 0]
+        user_no_submission_dates[row['UserId']] = no_submission_dates
+
+    # print("Users with No Timecard Submissions:")
+    # for user_id, dates in user_no_submission_dates.items():
+    #     print(f"User ID: {user_id}, No Submission Dates: {dates}")
+
+    # NOTE: Check which users have a non-empty list in dictionary
+
+    # NOTE: Get information of people that have no submissions for further follow-up (email)
+
+    # NOTE: Output the dataframe to a CSV for record-keeping -> keep in production repo (in file)
+
+    # NOTE: Draft up email content for users with no submissions -> will probably create separate python file to call for this
 
     # TODO: Add logging for the error handling here
     # if isinstance(timecards, str):
