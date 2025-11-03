@@ -5,14 +5,21 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Set, Optional
 import json
 from urllib.parse import urlencode
+from dotenv import load_dotenv
+
+load_dotenv()
+CLIENT_ID = os.getenv('TIMESOLV_CLIENT_ID')
+CLIENT_SECRET = os.getenv('TIMESOLV_CLIENT_SECRET')
+AUTH_CODE = os.getenv('TIMESOLV_AUTH_CODE')
+REDIRECT_URI = os.getenv('REDIRECT_URI')
 
 class TimeSolveAuth:
     """Handles OAuth2 authentication for TimeSolv API."""
-    def __init__(self, client_id: str, client_secret: str, auth_code: str, redirect_uri: str):
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.auth_code = auth_code
-        self.redirect_uri = redirect_uri
+    def __init__(self):
+        self.client_id = CLIENT_ID
+        self.client_secret = CLIENT_SECRET
+        self.auth_code = AUTH_CODE
+        self.redirect_uri = REDIRECT_URI
 
     def get_access_token(self) -> str:
         """Exchange authorization code for access token."""

@@ -13,10 +13,15 @@ load_dotenv()
 
 # Environment variables for TimeSolv API
 # NOTE: I will need to move these parts into production repo, and then call in .yaml
-TIMESOLV_CLIENT_ID = os.getenv('TIMESOLV_CLIENT_ID')
-TIMESOLV_CLIENT_SECRET = os.getenv('TIMESOLV_CLIENT_SECRET')
-TIMESOLV_AUTH_CODE = os.getenv('TIMESOLV_AUTH_CODE')
-REDIRECT_URI = os.getenv('REDIRECT_URI')
+# TIMESOLV_CLIENT_ID = os.getenv('TIMESOLV_CLIENT_ID')
+# TIMESOLV_CLIENT_SECRET = os.getenv('TIMESOLV_CLIENT_SECRET')
+# TIMESOLV_AUTH_CODE = os.getenv('TIMESOLV_AUTH_CODE')
+# REDIRECT_URI = os.getenv('REDIRECT_URI')
+
+# For Microsoft Graph API
+MSAL_CLIENT_ID = os.getenv('CLIENT_ID')
+MSAL_CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+MSAL_TENANT_ID = os.getenv('TENANT_ID')
 
 def get_start_and_end_week_dates():
     """Get the start (Monday) and end (Friday) dates of the current work week.
@@ -50,12 +55,7 @@ def get_work_week_dates():
 
 def main():
     # Obtain access token
-    timesolv_auth = TimeSolveAuth(
-        client_id=TIMESOLV_CLIENT_ID,
-        client_secret=TIMESOLV_CLIENT_SECRET,
-        auth_code=TIMESOLV_AUTH_CODE,
-        redirect_uri=REDIRECT_URI
-    )
+    timesolv_auth = TimeSolveAuth()
     access_token = timesolv_auth.get_access_token()
 
     # Initialize TimeSolv API
@@ -68,14 +68,14 @@ def main():
     start_date, end_date = get_start_and_end_week_dates()
     print(f"Fetching timecards from {start_date} to {end_date}...")     # TODO: Change to logging
 
-    # Create dataframe that contains user ID and dates with submission of timecard for each day
+    # Create dataframe that contains user ID and dates with submission of timecard for each day -> this will be created into XLSX/CSV later
     work_week_dates = get_work_week_dates()
-    column_list = ['UserId'] + work_week_dates
+    column_list = ['UserId', 'Email'] + work_week_dates
     timecard_tracker_df = pd.DataFrame(columns=column_list)
 
     # Iterate through firm users and populate dataframe
     for user in firm_users:
-        timecard_row = {'UserId': user['Id']}
+        timecard_row = {'UserId': user['Id'], 'Email': user['Email']}
         timecards = timesolv_api.search_timecards(
             start_date=start_date,
             end_date=end_date,
@@ -96,22 +96,18 @@ def main():
         # Append row to dataframe - convert dict to DataFrame first
         timecard_tracker_df = pd.concat([timecard_tracker_df, pd.DataFrame([timecard_row])], ignore_index=True)
 
-    # print("Timecard Submission Tracker DataFrame:")
-    # print(timecard_tracker_df)
-
-    # Create dictionary containing userId and dates with no submissions
+    # Create dictionary containing userId, email, and dates with no submissions
     user_no_submission_dates = {}
     for _, row in timecard_tracker_df.iterrows():
         no_submission_dates = [date for date in work_week_dates if row[date] == 0]
-        user_no_submission_dates[row['UserId']] = no_submission_dates
+        user_no_submission_dates[row['UserId']] = (row['Email'], no_submission_dates)
 
-    # print("Users with No Timecard Submissions:")
-    # for user_id, dates in user_no_submission_dates.items():
-    #     print(f"User ID: {user_id}, No Submission Dates: {dates}")
+    # Check which users have a non-empty list in dictionary
+    missing_submission_users = [user_id for user_id, (email, dates) in user_no_submission_dates.items() if len(dates) > 0]
 
-    # NOTE: Check which users have a non-empty list in dictionary
-
-    # NOTE: Get information of people that have no submissions for further follow-up (email)
+    for user_id in missing_submission_users:
+        email, dates = user_no_submission_dates[user_id]
+        print(f"User ID: {user_id}, Email: {email}, Missing Dates: {dates}")
 
     # NOTE: Output the dataframe to a CSV for record-keeping -> keep in production repo (in file)
 
