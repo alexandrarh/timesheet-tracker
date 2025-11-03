@@ -3,25 +3,9 @@ import logging
 from datetime import date, timedelta
 import time
 import os
-import msal
 import json
 import pandas as pd
-from dotenv import load_dotenv
- 
-# Loading environment variables from a .env file
-load_dotenv()
-
-# Environment variables for TimeSolv API
-# NOTE: I will need to move these parts into production repo, and then call in .yaml
-# TIMESOLV_CLIENT_ID = os.getenv('TIMESOLV_CLIENT_ID')
-# TIMESOLV_CLIENT_SECRET = os.getenv('TIMESOLV_CLIENT_SECRET')
-# TIMESOLV_AUTH_CODE = os.getenv('TIMESOLV_AUTH_CODE')
-# REDIRECT_URI = os.getenv('REDIRECT_URI')
-
-# For Microsoft Graph API
-MSAL_CLIENT_ID = os.getenv('CLIENT_ID')
-MSAL_CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-MSAL_TENANT_ID = os.getenv('TENANT_ID')
+from email_draft import EmailDraft
 
 def get_start_and_end_week_dates():
     """Get the start (Monday) and end (Friday) dates of the current work week.
