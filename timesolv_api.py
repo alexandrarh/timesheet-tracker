@@ -90,8 +90,8 @@ class TimeSolvAPI:
             response_data = response.json()
 
             # Check API response status
-            if response_data.get("Status", {}).get("ResponseCode") != 0:
-                error_message = response_data["Status"]["Message"]
+            if response_data.get("Status", {}).get("ResponseCode") != 200:
+                error_message = response_data.get("Status", {}).get("Message", "Unknown error")
                 return f"Error: {response_data['Status']['ResponseCode']} - {error_message}"
 
             # Extract user information
@@ -158,8 +158,8 @@ class TimeSolvAPI:
 
             response_data = response.json()
             
-            if response_data.get("Status", {}).get("ResponseCode") != 0:
-                error_message = response_data["Status"]["Message"]
+            if response_data.get("Status", {}).get("ResponseCode") != 200:
+                error_message = response_data.get("Status", {}).get("Message", "Unknown error")
                 return f"Error: {response_data['Status']['ResponseCode']} - {error_message}"
 
             timecards = response_data.get("TimeCards", [])
