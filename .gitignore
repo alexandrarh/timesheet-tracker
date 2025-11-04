@@ -210,3 +210,4 @@ __marimo__/
 .vscode/
 .DS_Store
 secrets.md
+status_test.log
