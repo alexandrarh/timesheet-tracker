@@ -95,7 +95,15 @@ def main():
 
     # NOTE: Output the dataframe to a CSV for record-keeping -> keep in production repo (in file)
 
-    # NOTE: Draft up email content for users with no submissions -> will probably create separate python file to call for this
+    # Draft up email content for users with no submissions 
+    email_draft = EmailDraft()
+    status, token = email_draft.get_access_token()
+    
+    if status:
+        pass
+    else:
+        # TODO: Log error message returned from attempting token retrieval, then exit?
+        pass
 
     # TODO: Add logging for the error handling here
     # if isinstance(timecards, str):
