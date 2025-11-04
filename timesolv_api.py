@@ -21,7 +21,7 @@ class TimeSolveAuth:
         self.auth_code = AUTH_CODE
         self.redirect_uri = REDIRECT_URI
 
-    def get_access_token(self) -> str:
+    def get_access_token(self) -> tuple[bool, str]:
         """Exchange authorization code for access token."""
         access_data = {
             "client_id": self.client_id,
@@ -33,9 +33,13 @@ class TimeSolveAuth:
 
         response = requests.post('https://apps.timesolv.com/Services/rest/oAuth2V1/Token', data=access_data)
         token_data = response.json()
+
+        if token_data.get("error"):
+            error_msg = f"Error obtaining access token: {token_data['error_description']}"
+            return False, error_msg
+
         access_token = token_data["access_token"]
-        
-        return access_token
+        return True, access_token
 
 class TimeSolvAPI:
     """API for retrieving necessary TimeSolv timesheet data."""
@@ -77,13 +81,21 @@ class TimeSolvAPI:
             }
 
             # Make the request
-            response = requests.post(url, headers=self.headers, json=payload).json()
+            response = requests.post(url, headers=self.headers, json=payload)
 
-            if response.get("ErrorCode"):
-                return f"Error fetching firm users: {response['ErrorCode']} - {response['ErrorMessage']}"
+            # Check HTTP errors
+            if response.status_code != 200:
+                return f"Error: HTTP {response.status_code} - {response.text}"
+            
+            response_data = response.json()
+
+            # Check API response status
+            if response_data.get("Status", {}).get("ResponseCode") != 0:
+                error_message = response_data["Status"]["Message"]
+                return f"Error: {response_data['Status']['ResponseCode']} - {error_message}"
 
             # Extract user information
-            users = response.get("FirmUsers", [])
+            users = response_data.get("FirmUsers", [])
             if not users:
                 break
 
@@ -139,12 +151,18 @@ class TimeSolvAPI:
                 "PageNumber": page_number
             }
 
-            response = requests.post(url, headers=self.headers, json=payload).json()
+            response = requests.post(url, headers=self.headers, json=payload)
 
-            if response.get("ErrorCode"):
-                return f"Error fetching time cards: {response['ErrorCode']} - {response['ErrorMessage']}"
+            if response.status_code != 200:
+                return f"Error: HTTP {response.status_code} - {response.text}"
 
-            timecards = response.get("TimeCards", [])
+            response_data = response.json()
+            
+            if response_data.get("Status", {}).get("ResponseCode") != 0:
+                error_message = response_data["Status"]["Message"]
+                return f"Error: {response_data['Status']['ResponseCode']} - {error_message}"
+
+            timecards = response_data.get("TimeCards", [])
             if not timecards:
                 break
 
