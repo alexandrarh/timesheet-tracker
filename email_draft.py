@@ -12,7 +12,7 @@ TENANT_ID = os.getenv('TENANT_ID')
 SENDER_EMAIL = os.getenv('SENDER_EMAIL')
 
 class EmailDraft:
-    def get_access_token() -> str:
+    def get_access_token() -> bool, str:
         """Authenticate with Microsoft Graph API to get token."""
         authority = f"https://login.microsoftonline.com/{TENANT_ID}"
 
@@ -28,12 +28,14 @@ class EmailDraft:
         )
         
         if 'access_token' in result:
-            return result['access_token']
+            status = True
+            return status, result['access_token']
         else:
-            raise Exception(f"Could not obtain access token: {result.get('error_description')}")  # TODO: See to logging this error
-        
+            status = False
+            return status, f"Could not obtain access token: {result.get('error_description')}"
+
     # TODO: Adjust function for including dates
-    def send_email(token, to_email, name, start_date, end_date, missing_dates) -> bool:
+    def send_email(token, to_email, name, start_date, end_date, missing_dates) -> bool, str:
         """
         Send an email using Microsoft Graph API.
 
@@ -78,12 +80,13 @@ class EmailDraft:
         response = requests.post(endpoint, headers=headers, json=message)
         
         if response.status_code == 202:
-            print(f"Email sent successfully to {to_email}")
-            return True
+            status = True
+            message_str = f"Email sent successfully to {to_email}"
+            return status, message_str
         else:
-            print(f"Failed to send email. Status code: {response.status_code}")
-            print(f"Response: {response.text}")
-            return False
+            status = False
+            message_str = f"Failed to send email. Status code: {response.status_code}"
+            return status, message_str
 
 # def main():
 #     token = EmailDraft.get_access_token()
