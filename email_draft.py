@@ -12,7 +12,7 @@ TENANT_ID = os.getenv('TENANT_ID')
 SENDER_EMAIL = os.getenv('SENDER_EMAIL')
 
 class EmailDraft:
-    def get_access_token() -> bool, str:
+    def get_access_token(self) -> tuple[bool, str]:
         """Authenticate with Microsoft Graph API to get token."""
         authority = f"https://login.microsoftonline.com/{TENANT_ID}"
 
@@ -26,16 +26,19 @@ class EmailDraft:
         result = app.acquire_token_for_client(
             scopes=['https://graph.microsoft.com/.default']
         )
-        
-        if 'access_token' in result:
-            status = True
-            return status, result['access_token']
-        else:
-            status = False
-            return status, f"Could not obtain access token: {result.get('error_description')}"
+
+        if 'access_token' not in result:
+            error = result.get("error")
+            error_description = result.get("error_description")
+            correlation_id = result.get("correlation_id")
+            message = f"Could not obtain access token: {error} - {error_description} (Correlation ID: {correlation_id})"
+
+            return False, message
+
+        return True, result['access_token']
 
     # TODO: Adjust function for including dates
-    def send_email(token, to_email, name, start_date, end_date, missing_dates) -> bool, str:
+    def send_email(self, token, to_email, name, start_date, end_date, missing_dates) -> tuple[bool, str]:
         """
         Send an email using Microsoft Graph API.
 
@@ -72,21 +75,21 @@ class EmailDraft:
                 },
                 'toRecipients': to_recipients
             },
-            'saveToSentItems': 'true'
+            'saveToSentItems': "false"
         }
 
         endpoint = f'https://graph.microsoft.com/v1.0/users/{SENDER_EMAIL}/sendMail'
-        
         response = requests.post(endpoint, headers=headers, json=message)
         
-        if response.status_code == 202:
-            status = True
-            message_str = f"Email sent successfully to {to_email}"
-            return status, message_str
-        else:
+        # If there's an error sending the email
+        if response.status_code != 202:
             status = False
             message_str = f"Failed to send email. Status code: {response.status_code}"
             return status, message_str
+        
+        status = True
+        message_str = f"Email sent successfully to {to_email}"
+        return status, message_str
 
 # def main():
 #     token = EmailDraft.get_access_token()
