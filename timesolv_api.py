@@ -155,4 +155,3 @@ class TimeSolvAPI:
             page_number += 1
 
         return timecard_list
-    
