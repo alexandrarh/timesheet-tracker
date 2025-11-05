@@ -88,6 +88,9 @@ def main():
 
     # Iterate through firm users and populate dataframe
     for user in firm_users:
+        if user['Id'] in exclude_user_ids:
+            logger.info(f"Excluding user {user['Id']} from tracking as per exclusion list.")
+            continue
         timecard_row = {'UserId': user['Id'], 'Email': user['Email'], 'Name': f"{user['FirstName'].strip()} {user['LastName'].strip()}"}
         timecards = timesolv_api.search_timecards(
             start_date=start_date,
