@@ -23,13 +23,17 @@ logger.addHandler(logger_file_handler)
 # List of user IDs to exclude from email notifications -> see if could implement this dynamically later
 exclude_user_ids = [87002]  
 
+from datetime import date, timedelta, datetime
+from zoneinfo import ZoneInfo
+
 def get_start_and_end_week_dates():
     """Get the start (Monday) and end (Friday) dates of the current work week.
     
     Returns:
     - Tuple containing start and end dates as strings in 'YYYY-MM-DD' format.
     """
-    today = date.today()
+    # Use Eastern time to get the correct "today" regardless of UTC time
+    today = datetime.now(ZoneInfo('America/New_York')).date()
 
     # Get Monday of current week (weekday: 0=Monday, 6=Sunday)
     monday = today - timedelta(days=today.weekday())
@@ -45,7 +49,8 @@ def get_work_week_dates():
     Returns:
     - List of dates as strings in 'YYYY-MM-DD' format.
     """
-    today = date.today()
+    # Use Eastern time to get the correct "today" regardless of UTC time
+    today = datetime.now(ZoneInfo('America/New_York')).date()
     monday = today - timedelta(days=today.weekday())
     
     # Generate all 5 work days
