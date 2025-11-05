@@ -211,3 +211,4 @@ __marimo__/
 .DS_Store
 secrets.md
 status_test.log
+local_test.py
