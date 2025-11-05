@@ -32,3 +32,7 @@ import os
 - Contains the components that will help GitHub Actions run (automated aspect)
     - Refer to `experience/work-files/insite_work/insite-files/cron_job_test/../actions.yaml` file
 - Should run daily (1x a day, EOD)
+
+### Necessary documentation
+- [user.sendMail](https://learn.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0&tabs=http)
+- [Acquiring tokens for Microsoft Graph API](https://learn.microsoft.com/en-us/entra/msal/python/getting-started/acquiring-tokens)
