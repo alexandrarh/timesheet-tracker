@@ -37,8 +37,7 @@ class EmailDraft:
 
         return True, result['access_token']
 
-    # TODO: Adjust function for including dates
-    def send_email(self, token, to_email, name, start_date, end_date, missing_dates) -> tuple[bool, str]:
+    def send_email(self, token, to_email, name, user_id, start_date, end_date, missing_dates) -> tuple[bool, str]:
         """
         Send an email using Microsoft Graph API.
 
@@ -51,7 +50,7 @@ class EmailDraft:
         body = f"Dear {name},\n\nOur records indicate that you have not submitted your time sheets for the following dates in the current work week:\n"
         for date in missing_dates:
             body += f"- {date}\n"
-        body += "\nPlease ensure that you submit your time sheets on TimeSolv at your earliest convenience. Otherwise, the selected dates will be processed as PTO.\n\nBest regards,\nAlexandra Hernandez"
+        body += "\nPlease ensure that you submit your time sheets on TimeSolv at your earliest convenience. Otherwise, the above dates will be processed as PTO. If you have any questions or concerns, please don't hesitate to reach out.\n\nBest regards,\nAlexandra Hernandez"
 
         subject = f"Missing time sheets for work week {start_date} to {end_date}"
 
@@ -88,7 +87,7 @@ class EmailDraft:
             return status, message_str
         
         status = True
-        message_str = f"Email sent successfully to {to_email}"
+        message_str = f"Email sent successfully to {user_id}."
         return status, message_str
 
 # def main():

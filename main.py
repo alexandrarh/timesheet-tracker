@@ -20,6 +20,9 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 logger_file_handler.setFormatter(formatter)
 logger.addHandler(logger_file_handler)
 
+# List of user IDs to exclude from email notifications -> see if could implement this dynamically later
+exclude_user_ids = [87002]  
+
 def get_start_and_end_week_dates():
     """Get the start (Monday) and end (Friday) dates of the current work week.
     
@@ -57,7 +60,7 @@ def main():
     timesolv_auth = TimeSolveAuth()
     status, access_token = timesolv_auth.get_access_token()
     if not status:
-        logger.error(f"Failed to obtain access token: {access_token}")  # TODO: Figure out how to restart process (max tries before alert)
+        logger.error(access_token)          # TODO: Figure out how to restart process (max tries before alert)
         return
 
     # Initialize TimeSolv API
@@ -66,7 +69,7 @@ def main():
     # Fetch firm users
     firm_users = timesolv_api.get_all_firm_users()
     if isinstance(firm_users, str):
-        logger.error(f"Error fetching firm users: {firm_users}")  # TODO: Figure out how to restart process (max tries before alert)
+        logger.error(firm_users)            # TODO: Figure out how to restart process (max tries before alert)
         return
 
     # Get dates for range (current work week)
@@ -105,14 +108,16 @@ def main():
         # Append row to dataframe - convert dict to DataFrame first
         timecard_tracker_df = pd.concat([timecard_tracker_df, pd.DataFrame([timecard_row])], ignore_index=True)
 
-    # Create dictionary containing userId, email, and dates with no submissions
+    # Create dictionary containing userId, email, and dates with no submissions; excludes users in exclusion list
     user_no_submission_dates = {}
     for _, row in timecard_tracker_df.iterrows():
+        if row['UserId'] in exclude_user_ids:
+            continue
         no_submission_dates = [date for date in work_week_dates if row[date] == 0]
         user_no_submission_dates[row['UserId']] = (row['Email'], row['Name'], no_submission_dates)
 
-    # Check which users have a non-empty list in dictionary
-    missing_submission_users = [user_id for user_id, (email, name, dates) in user_no_submission_dates.items() if len(dates) > 0]
+    # Check which users have a non-empty list in dictionary -> excludes users in exclusion list (double check)
+    missing_submission_users = [user_id for user_id, (email, name, dates) in user_no_submission_dates.items() if len(dates) > 0 and user_id not in exclude_user_ids]
 
     # Draft up email content for users with no submissions 
     email_draft = EmailDraft()
@@ -129,6 +134,7 @@ def main():
             token=access_token,
             to_email=email,                                         # NOTE: Format is user_no_submission_dates[user_id][0]
             name=sender_name,                                       # NOTE: Format is user_no_submission_dates[user_id][1]
+            user_id=user_id,
             start_date=start_date,
             end_date=end_date,
             missing_dates=dates                                     # NOTE: Format is user_no_submission_dates[user_id][2]
@@ -140,24 +146,11 @@ def main():
 
         logger.info(message)
     
-    # NOTE: Output the dataframe to a CSV for record-keeping -> keep in production repo (in file)
-
-    # TODO: Add logging for the error handling here
-    # if isinstance(timecards, str):
-    #     user_timecard_count[user['Id']] = 0
-    # else:
-    #     user_timecard_count[user['Id']] = len(timecards)
-
-    # TODO: Add logging and error handling as needed
-    # if isinstance(firm_users, str):
-    #     print(f"Error fetching firm users: {firm_users}")
-    # else:
-    #     print(f"Fetched {len(firm_users)} firm users.")
-    #     for user in firm_users:
-    #         print(f"User ID: {user['Id']}, Name: {user['FirstName']} {user['LastName']}")
-
-    # Fetch timecards for the current work week
-    # timecards = timesolv_api.search_timecards(start_date=start_date, end_date=end_date)
+    # Output the dataframe to a CSV for record-keeping -> keep in production repo (in file) -> should be keep emails in or no
+    saved_data = timecard_tracker_df.drop(['Email', 'Name'], axis=1)
+    csv_filename = f"timecard_submissions_{start_date}_to_{end_date}.csv"
+    saved_data.to_csv(csv_filename, index=False)
+    logger.info(f"Timecard submission data saved to {csv_filename}")
 
 if __name__ == "__main__":
     main()
