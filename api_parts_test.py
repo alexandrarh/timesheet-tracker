@@ -130,43 +130,45 @@ def main():
     # print(f"Access Token: {access_token}")
 
     # Testing get all firm users
-    # firm_users = get_firm_users(access_token)
-    # print(firm_users)
+    firm_users = get_firm_users(access_token)
+    for user in firm_users:
+        if user['Id'] == 92915:
+            print(f"User ID: {user['Id']}, Email: {user['Email']}, Name: {user['FirstName'].strip()} {user['LastName'].strip()}")
 
     # Testing search timecards
-    def get_start_and_end_week_dates():
-        """Get the start (Monday) and end (Friday) dates of the current work week.
+    # def get_start_and_end_week_dates():
+    #     """Get the start (Monday) and end (Friday) dates of the current work week.
         
-        Returns:
-        - Tuple containing start and end dates as strings in 'YYYY-MM-DD' format.
-        """
-        today = date.today()
+    #     Returns:
+    #     - Tuple containing start and end dates as strings in 'YYYY-MM-DD' format.
+    #     """
+    #     today = date.today()
 
-        # Get Monday of current week (weekday: 0=Monday, 6=Sunday)
-        monday = today - timedelta(days=today.weekday())
+    #     # Get Monday of current week (weekday: 0=Monday, 6=Sunday)
+    #     monday = today - timedelta(days=today.weekday())
         
-        # Get Friday of current week (Monday + 4 days)
-        friday = monday + timedelta(days=4)
+    #     # Get Friday of current week (Monday + 4 days)
+    #     friday = monday + timedelta(days=4)
         
-        return monday.strftime('%Y-%m-%d'), friday.strftime('%Y-%m-%d')
+    #     return monday.strftime('%Y-%m-%d'), friday.strftime('%Y-%m-%d')
 
-    def get_work_week_dates():
-        """Get the start (Monday) and end (Friday) dates of the current work week.
+    # def get_work_week_dates():
+    #     """Get the start (Monday) and end (Friday) dates of the current work week.
 
-        Returns:
-        - List of dates as strings in 'YYYY-MM-DD' format.
-        """
-        today = date.today()
-        monday = today - timedelta(days=today.weekday())
+    #     Returns:
+    #     - List of dates as strings in 'YYYY-MM-DD' format.
+    #     """
+    #     today = date.today()
+    #     monday = today - timedelta(days=today.weekday())
         
-        # Generate all 5 work days
-        work_week = [monday + timedelta(days=i) for i in range(5)]
+    #     # Generate all 5 work days
+    #     work_week = [monday + timedelta(days=i) for i in range(5)]
         
-        return [day.strftime('%Y-%m-%d') for day in work_week]
+    #     return [day.strftime('%Y-%m-%d') for day in work_week]
 
-    print("Current Work Week Dates:", get_work_week_dates())
-    column_list = ['UserId'] + get_work_week_dates()
-    print("Column List:", column_list)
+    # print("Current Work Week Dates:", get_work_week_dates())
+    # column_list = ['UserId'] + get_work_week_dates()
+    # print("Column List:", column_list)
 
     # start_date, end_date = get_work_week_dates()
     # timecards = search_timecards(access_token, start_date, end_date)
