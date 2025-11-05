@@ -153,7 +153,7 @@ def main():
     
     # Output the dataframe to a CSV for record-keeping -> keep in production repo (in file) -> should be keep emails in or no
     saved_data = timecard_tracker_df.drop(['Email', 'Name'], axis=1)
-    csv_filename = f"timecard_submissions_{start_date}_to_{end_date}.csv"
+    csv_filename = f"artifacts/timecard_submissions_{start_date}_to_{end_date}.csv"
     saved_data.to_csv(csv_filename, index=False)
     logger.info(f"Timecard submission data saved to {csv_filename}")
 
