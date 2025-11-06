@@ -1,7 +1,8 @@
 from timesolv_api import TimeSolvAPI, TimeSolveAuth
 import logging
 import logging.handlers
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
+from zoneinfo import ZoneInfo
 import time
 import os
 import json
@@ -22,9 +23,6 @@ logger.addHandler(logger_file_handler)
 
 # List of user IDs to exclude from email notifications -> see if could implement this dynamically later
 exclude_user_ids = [87002]  
-
-from datetime import date, timedelta, datetime
-from zoneinfo import ZoneInfo
 
 def get_start_and_end_week_dates():
     """Get the start (Monday) and end (Friday) dates of the current work week.
@@ -82,9 +80,13 @@ def main():
     logger.info(f"Fetching timecards from {start_date} to {end_date}...")
 
     # Create dataframe that contains user ID and dates with submission of timecard for each day -> this will be created into XLSX/CSV later
+    basic_columns = ['UserId', 'Email', 'Name']
     work_week_dates = get_work_week_dates()
-    column_list = ['UserId', 'Email', 'Name'] + work_week_dates
+    column_list = basic_columns + work_week_dates
+    listed_dates_columns = basic_columns + ['NoSubmissionDates']
+
     timecard_tracker_df = pd.DataFrame(columns=column_list)
+    timecard_listed_dates_df = pd.DataFrame(columns=listed_dates_columns)
 
     # Iterate through firm users and populate dataframe
     for user in firm_users:
@@ -92,6 +94,9 @@ def main():
             logger.info(f"Excluding user {user['Id']} from tracking as per exclusion list.")
             continue
         timecard_row = {'UserId': user['Id'], 'Email': user['Email'], 'Name': f"{user['FirstName'].strip()} {user['LastName'].strip()}"}
+        timecard_listed_dates_row = {'UserId': user['Id'], 'Email': user['Email'], 'Name': f"{user['FirstName'].strip()} {user['LastName'].strip()}"}
+        timecard_missing_dates = []
+
         timecards = timesolv_api.search_timecards(
             start_date=start_date,
             end_date=end_date,
@@ -113,19 +118,12 @@ def main():
                 if tc_date in timecard_row:
                     timecard_row[tc_date] = 1
 
+        timecard_missing_dates = [date_str for date_str in work_week_dates if timecard_row[date_str] == 0]
+        timecard_listed_dates_row['NoSubmissionDates'] = timecard_missing_dates
+
         # Append row to dataframe - convert dict to DataFrame first
         timecard_tracker_df = pd.concat([timecard_tracker_df, pd.DataFrame([timecard_row])], ignore_index=True)
-
-    # Create dictionary containing userId, email, and dates with no submissions; excludes users in exclusion list
-    user_no_submission_dates = {}
-    for _, row in timecard_tracker_df.iterrows():
-        if row['UserId'] in exclude_user_ids:
-            continue
-        no_submission_dates = [date for date in work_week_dates if row[date] == 0]
-        user_no_submission_dates[row['UserId']] = (row['Email'], row['Name'], no_submission_dates)
-
-    # Check which users have a non-empty list in dictionary -> excludes users in exclusion list (double check)
-    missing_submission_users = [user_id for user_id, (email, name, dates) in user_no_submission_dates.items() if len(dates) > 0 and user_id not in exclude_user_ids]
+        timecard_listed_dates_df = pd.concat([timecard_listed_dates_df, pd.DataFrame([timecard_listed_dates_row])], ignore_index=True)
 
     # Draft up email content for users with no submissions 
     email_draft = EmailDraft()
@@ -135,17 +133,16 @@ def main():
         logger.error(access_token)      # TODO: Figure out how to restart process (max tries before alert)
         return
 
-    # Sending out emails
-    for user_id in missing_submission_users:
-        email, sender_name, dates = user_no_submission_dates[user_id]
+    for index, row in timecard_listed_dates_df.iterrows():
+        user_id, email, sender_name, dates = row['UserId'], row['Email'], row['Name'], row['NoSubmissionDates']
         status, message = email_draft.send_email(
             token=access_token,
-            to_email=email,                                         # NOTE: Format is user_no_submission_dates[user_id][0]
-            name=sender_name,                                       # NOTE: Format is user_no_submission_dates[user_id][1]
+            to_email=email,                                         
+            name=sender_name,                                       
             user_id=user_id,
             start_date=start_date,
             end_date=end_date,
-            missing_dates=dates                                     # NOTE: Format is user_no_submission_dates[user_id][2]
+            missing_dates=dates
         )
 
         if not status:
@@ -153,6 +150,11 @@ def main():
             return
 
         logger.info(message)
+
+    # NOTE: Should there be a generated summary report df, then it's appended to existing data?
+    # Database with these collections: user information (e.g. id, name, email), dates with no submission 
+    # Dates with no submission: user_id, dates (lists of dates with no submission) -> How do we want to update this when dates are filled in later?
+    # Probably will need to build a checker bot that checks for filled-in dates and updates the database accordingly
     
     # Output the dataframe to a CSV for record-keeping -> keep in production repo (in file) -> should be keep emails in or no
     saved_data = timecard_tracker_df.drop(['Email', 'Name'], axis=1)
