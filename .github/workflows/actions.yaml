@@ -28,7 +28,7 @@ jobs:
           TIMESOLV_CLIENT_ID: ${{ secrets.TIMESOLV_CLIENT_ID }}
           TIMESOLV_CLIENT_SECRET: ${{ secrets.TIMESOLV_CLIENT_SECRET }}
           TIMESOLV_AUTH_CODE: ${{ secrets.TIMESOLV_AUTH_CODE }}
-          TIMESOLV_REDIRECT_URI: ${{ secrets.TIMESOLV_REDIRECT_URI }}
+          REDIRECT_URI: ${{ secrets.REDIRECT_URI }}
 
           # For Microsoft Graph API
           MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
