@@ -212,3 +212,6 @@ __marimo__/
 secrets.md
 status_test.log
 local_test.py
+
+# Excluded files
+!status.log
