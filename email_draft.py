@@ -4,16 +4,11 @@ import json
 import os
 from dotenv import load_dotenv
  
-# load_dotenv()
-# CLIENT_ID = os.getenv('CLIENT_ID')
-# CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-# TENANT_ID = os.getenv('TENANT_ID')
-# SENDER_EMAIL = os.getenv('SENDER_EMAIL')
-
-CLIENT_ID = os.environ['MICROSOFT_CLIENT_ID']
-CLIENT_SECRET = os.environ['MICROSOFT_CLIENT_SECRET']
-TENANT_ID = os.environ['MICROSOFT_TENANT_ID']
-SENDER_EMAIL = os.environ['SENDER_EMAIL']
+load_dotenv()
+CLIENT_ID = os.getenv('MICROSOFT_CLIENT_ID')
+CLIENT_SECRET = os.getenv('MICROSOFT_CLIENT_SECRET')
+TENANT_ID = os.getenv('MICROSOFT_TENANT_ID')
+SENDER_EMAIL = os.getenv('SENDER_EMAIL')
 
 class EmailDraft:
     def get_access_token(self) -> tuple[bool, str]:
@@ -54,7 +49,7 @@ class EmailDraft:
         body = f"Dear {name},\n\nOur records indicate that you have not submitted your time sheets for the following dates in the current work week:\n"
         for date in missing_dates:
             body += f"- {date}\n"
-        body += "\nPlease ensure that you submit your time sheets on TimeSolv at your earliest convenience. Otherwise, the above dates will be processed as PTO. If you have any questions or concerns, please don't hesitate to reach out.\n\nBest regards,\nAlexandra Hernandez"
+        body += "\nPlease ensure that you submit your time sheets on TimeSolv at your earliest convenience. Otherwise, the above dates will be processed as PTO; however, if PTO was already requested for the specific dates above, please ignore this email. \n\nIf you have any questions or concerns, please don't hesitate to reach out.\n\nBest regards,\nAlexandra Hernandez"
 
         subject = f"Missing time sheets for work week {start_date} to {end_date}"
 

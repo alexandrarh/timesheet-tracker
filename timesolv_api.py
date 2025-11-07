@@ -7,16 +7,11 @@ import json
 from urllib.parse import urlencode
 from dotenv import load_dotenv
 
-# load_dotenv()
-# CLIENT_ID = os.getenv('TIMESOLV_CLIENT_ID')
-# CLIENT_SECRET = os.getenv('TIMESOLV_CLIENT_SECRET')
-# AUTH_CODE = os.getenv('TIMESOLV_AUTH_CODE')
-# REDIRECT_URI = os.getenv('REDIRECT_URI')
-
-CLIENT_ID = os.environ['TIMESOLV_CLIENT_ID']
-CLIENT_SECRET = os.environ['TIMESOLV_CLIENT_SECRET']
-AUTH_CODE = os.environ['TIMESOLV_AUTH_CODE']
-REDIRECT_URI = os.environ['REDIRECT_URI']
+load_dotenv()
+CLIENT_ID = os.getenv('TIMESOLV_CLIENT_ID')
+CLIENT_SECRET = os.getenv('TIMESOLV_CLIENT_SECRET')
+AUTH_CODE = os.getenv('TIMESOLV_AUTH_CODE')
+REDIRECT_URI = os.getenv('REDIRECT_URI')
 
 class TimeSolveAuth:
     """Handles OAuth2 authentication for TimeSolv API."""
