@@ -83,7 +83,7 @@ def main():
     basic_columns = ['UserId', 'Email', 'Name']
     work_week_dates = get_work_week_dates()
     column_list = basic_columns + work_week_dates
-    listed_dates_columns = basic_columns + ['NoSubmissionDates']
+    listed_dates_columns = basic_columns + ['NoSubmissionDates', 'lastEmailSentDate', 'lastUpdateDate']
 
     timecard_tracker_df = pd.DataFrame(columns=column_list)
     timecard_listed_dates_df = pd.DataFrame(columns=listed_dates_columns)
@@ -151,13 +151,17 @@ def main():
 
         logger.info(message)
 
+        # Updating the last email sent and update date columns
+        row['lastEmailSentDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
+        row['lastUpdateDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
+
     # NOTE: Should there be a generated summary report df, then it's appended to existing data?
     # Database with these collections: user information (e.g. id, name, email), dates with no submission 
     # Dates with no submission: user_id, dates (lists of dates with no submission) -> How do we want to update this when dates are filled in later?
     # Probably will need to build a checker bot that checks for filled-in dates and updates the database accordingly
     
     # Output the dataframe to a CSV for record-keeping -> keep in production repo (in file) -> should be keep emails in or no
-    saved_data = timecard_tracker_df.drop(['Email', 'Name'], axis=1)
+    saved_data = timecard_listed_dates_df.drop(['Email', 'Name'], axis=1)
     csv_filename = f"artifacts/timecard_submissions_{start_date}_to_{end_date}.csv"
     saved_data.to_csv(csv_filename, index=False)
     logger.info(f"Timecard submission data saved to {csv_filename}")
