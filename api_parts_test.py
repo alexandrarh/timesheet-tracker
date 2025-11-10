@@ -132,8 +132,8 @@ def main():
     # Testing get all firm users
     firm_users = get_firm_users(access_token)
     for user in firm_users:
-        if user['Id'] == 92915:
-            print(f"User ID: {user['Id']}, Email: {user['Email']}, Name: {user['FirstName'].strip()} {user['LastName'].strip()}")
+        # if user['Id'] == 92915:
+        print(f"User ID: {user['Id']}, Email: {user['Email']}, Name: {user['FirstName'].strip()} {user['LastName'].strip()}")
 
     # Testing search timecards
     # def get_start_and_end_week_dates():
