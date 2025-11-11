@@ -43,6 +43,10 @@ class EmailDraft:
         Args:
         - token: The access token for Microsoft Graph API.
         - to_email: The recipient's email address.
+        - name: The recipient's name.
+        - user_id: The recipient's user ID.
+        - start_date: Start date of the work week.
+        - end_date: End date of the work week.
         - missing_dates: List of dates with missing time sheet submissions.
         """
 
@@ -52,6 +56,59 @@ class EmailDraft:
         body += "\nPlease ensure that you submit your time sheets on TimeSolv at your earliest convenience. Otherwise, the above dates will be processed as PTO; however, if PTO was already requested for the specific dates above, please ignore this email. \n\nIf you have any questions or concerns, please don't hesitate to reach out.\n\nBest regards,\nAlexandra Hernandez"
 
         subject = f"Missing time sheets for work week {start_date} to {end_date}"
+
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json'
+        }
+
+        # For single or multiple recipients
+        if isinstance(to_email, str):
+            to_recipients = [{"emailAddress": {"address": to_email}}]
+        else:
+            to_recipients = [{"emailAddress":{"address":email}} for email in to_email]
+            
+        message = {
+            'message': {
+                'subject': subject,
+                'body': {
+                    'contentType': 'Text',
+                    'content': body
+                },
+                'toRecipients': to_recipients
+            },
+            'saveToSentItems': "false"
+        }
+
+        endpoint = f'https://graph.microsoft.com/v1.0/users/{SENDER_EMAIL}/sendMail'
+        response = requests.post(endpoint, headers=headers, json=message)
+        
+        # If there's an error sending the email
+        if response.status_code != 202:
+            status = False
+            message_str = f"Failed to send email. Status code: {response.status_code}"
+            return status, message_str
+        
+        status = True
+        message_str = f"Email sent successfully to {user_id}."
+        return status, message_str
+
+    def summary_email(self, token, to_email, missing_users_dates, start_date, end_date) -> tuple[bool, str]:
+        """
+        Send a summary email listing all users with missing time sheet submissions.
+        
+        Args:
+        - token: The access token for Microsoft Graph API.
+        - to_email: The recipient's email address, admins.
+        - missing_users_dates: A dictionary mapping user IDs to their missing date ranges.
+        - start_date: Start date of the work week.
+        - end_date: End date of the work week.
+        """
+
+        # This will contain a summary report of all users with missing submissions
+        body = ""
+
+        subject = "Summary of Users with Missing Time Sheet Submissions for Work Week " + start_date + " to " + end_date
 
         headers = {
             'Authorization': f'Bearer {token}',
