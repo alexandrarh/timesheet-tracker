@@ -3,6 +3,7 @@ import msal
 import json
 import os
 from dotenv import load_dotenv
+import base64
  
 load_dotenv()
 CLIENT_ID = os.getenv('MICROSOFT_CLIENT_ID')
@@ -93,22 +94,36 @@ class EmailDraft:
         message_str = f"Email sent successfully to {user_id}."
         return status, message_str
 
-    def summary_email(self, token, to_email, missing_users_dates, start_date, end_date) -> tuple[bool, str]:
+    def summary_email(self, token, to_email, users, start_date, end_date) -> tuple[bool, str]:
         """
         Send a summary email listing all users with missing time sheet submissions.
         
         Args:
         - token: The access token for Microsoft Graph API.
         - to_email: The recipient's email address, admins.
-        - missing_users_dates: A dictionary mapping user IDs to their missing date ranges.
+        - users: A dictionary mapping user IDs to their missing date ranges.
         - start_date: Start date of the work week.
         - end_date: End date of the work week.
         """
 
         # This will contain a summary report of all users with missing submissions
-        body = ""
+        body = "Dear Admin,\n\nThe following users have missing time sheet submissions for the work week:\n\n"
+        for index, row in users.iterrows():
+            name = row['Name']
+            missing_dates = row['NoSubmissionDates']
+            # Convert list to comma-separated string
+            missing_dates_str = ', '.join(missing_dates) if isinstance(missing_dates, list) else missing_dates
+            body += f"- Name: {name}, Missing Dates: {missing_dates_str}\n"
+        body += "\nPlease find the attached file for detailed information.\n\nBest regards,\nAlexandra Hernandez"
 
         subject = "Summary of Users with Missing Time Sheet Submissions for Work Week " + start_date + " to " + end_date
+
+        # Saving the summary report as an attachment (CSV file for simplicity)
+        filename = 'missing_time_sheets_summary.csv'
+        users.to_csv(filename, index=False)
+        with open(filename, 'rb') as f:
+            file_content = f.read()
+            encoded_content = base64.b64encode(file_content).decode('utf-8')
 
         headers = {
             'Authorization': f'Bearer {token}',
@@ -128,7 +143,15 @@ class EmailDraft:
                     'contentType': 'Text',
                     'content': body
                 },
-                'toRecipients': to_recipients
+                'toRecipients': to_recipients,
+                "attachments": [
+                    {
+                        "@odata.type": "#microsoft.graph.fileAttachment",
+                        "name": filename,
+                        "contentType": "text/csv",
+                        "contentBytes": encoded_content
+                    }
+                ]
             },
             'saveToSentItems': "false"
         }
@@ -143,7 +166,7 @@ class EmailDraft:
             return status, message_str
         
         status = True
-        message_str = f"Email sent successfully to {user_id}."
+        message_str = f"Email sent successfully."
         return status, message_str
 
 # def main():
