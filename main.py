@@ -9,11 +9,11 @@ import os
 import json
 import pandas as pd
 from email_draft import EmailDraft
-import tempfile
 from dotenv import load_dotenv
+import ast
 
 load_dotenv()
-ADMIN_EMAILS = os.getenv('ADMIN_EMAILS')            #.split(',') -> later when multiple admins are added
+ADMIN_EMAILS = ast.literal_eval(os.getenv('ADMIN_EMAILS'))
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -211,30 +211,21 @@ def main():
             if attempt < MAX_RETRIES:
                 logger.warning(f"Attempt {attempt} to send email to user {user_id} failed. Retrying...")
                 time.sleep(2)
-        
         if not status:
             logger.error(f"Failed to send email to user {user_id}: {message}. Exceeded maximum retries.")
             timecard_listed_dates_df.at[index, 'lastUpdateDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
             continue
 
-        logger.info(message)
-
         # Updating the last email sent and update date columns
         timecard_listed_dates_df.at[index, 'lastEmailSentDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
         timecard_listed_dates_df.at[index, 'lastUpdateDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
 
-    # Send summary email to admins with CSV (or xlsx) attachment of all users with missing submissions
-    with tempfile.NamedTemporaryFile(mode='w', delete=False, newline='', suffix='.csv') as temp_csv_file:
-        timecard_listed_dates_df.to_csv(temp_csv_file.name, index=False)
-        temp_csv_file_path = temp_csv_file.name
-
-    # TODO: Change to loop when added more admins
+    # Sending summary email to admins
     for attempt in range(1, MAX_RETRIES + 1):
         status, message = email_draft.summary_email(
             token=access_token,
             to_email=ADMIN_EMAILS,
             users=timecard_listed_dates_df,
-            sheets_file=temp_csv_file_path,
             start_date=start_date,
             end_date=end_date
         )
@@ -248,7 +239,10 @@ def main():
             time.sleep(2)
     if not status:
         logger.error(f"Failed to send summary email to admins: {message}. Exceeded maximum retries.")
-        return
+        return  # Change to continue when there's more admins
+        
+    logger.info("Main process completed successfully.")
+    os.remove('missing_time_sheets_summary.csv') 
 
     # NOTE: Should there be a generated summary report df, then it's appended to existing data?
     # Database with these collections: user information (e.g. id, name, email), dates with no submission 
