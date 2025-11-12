@@ -9,6 +9,11 @@ import os
 import json
 import pandas as pd
 from email_draft import EmailDraft
+import tempfile
+from dotenv import load_dotenv
+
+load_dotenv()
+ADMIN_EMAILS = os.getenv('ADMIN_EMAILS')            #.split(',') -> later when multiple admins are added
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -23,7 +28,7 @@ logger_file_handler.setFormatter(formatter)
 logger.addHandler(logger_file_handler)
 
 # List of user IDs to exclude from email notifications -> see if could implement this dynamically later
-exclude_user_ids = [87002, 30847]
+exclude_user_ids = [87002]
 
 # Retry number for attempted API calls and such
 MAX_RETRIES = 3
@@ -218,16 +223,43 @@ def main():
         timecard_listed_dates_df.at[index, 'lastEmailSentDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
         timecard_listed_dates_df.at[index, 'lastUpdateDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
 
+    # Send summary email to admins with CSV (or xlsx) attachment of all users with missing submissions
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, newline='', suffix='.csv') as temp_csv_file:
+        timecard_listed_dates_df.to_csv(temp_csv_file.name, index=False)
+        temp_csv_file_path = temp_csv_file.name
+
+    # TODO: Change to loop when added more admins
+    for attempt in range(1, MAX_RETRIES + 1):
+        status, message = email_draft.summary_email(
+            token=access_token,
+            to_email=ADMIN_EMAILS,
+            users=timecard_listed_dates_df,
+            sheets_file=temp_csv_file_path,
+            start_date=start_date,
+            end_date=end_date
+        )
+
+        if status:
+            logger.info(f"Successfully sent summary email to admins on attempt {attempt}.")
+            break
+
+        if attempt < MAX_RETRIES:
+            logger.warning(f"Attempt {attempt} to send summary email to admins failed. Retrying...")
+            time.sleep(2)
+    if not status:
+        logger.error(f"Failed to send summary email to admins: {message}. Exceeded maximum retries.")
+        return
+
     # NOTE: Should there be a generated summary report df, then it's appended to existing data?
     # Database with these collections: user information (e.g. id, name, email), dates with no submission 
     # Dates with no submission: user_id, dates (lists of dates with no submission) -> How do we want to update this when dates are filled in later?
     # Probably will need to build a checker bot that checks for filled-in dates and updates the database accordingly
     
     # Output the dataframe to a CSV for record-keeping -> keep in production repo (in file) -> should be keep emails in or no
-    saved_data = timecard_listed_dates_df.drop(['Email', 'Name'], axis=1)
-    csv_filename = f"artifacts/timecard_submissions_{start_date}_to_{end_date}.csv"
-    saved_data.to_csv(csv_filename, index=False)
-    logger.info(f"Timecard submission data saved to {csv_filename}")
+    # saved_data = timecard_listed_dates_df.drop(['Email', 'Name'], axis=1)
+    # csv_filename = f"artifacts/timecard_submissions_{start_date}_to_{end_date}.csv"
+    # saved_data.to_csv(csv_filename, index=False)
+    # logger.info(f"Timecard submission data saved to {csv_filename}")
 
 if __name__ == "__main__":
     main()
