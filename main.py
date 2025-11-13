@@ -188,8 +188,8 @@ def main():
     for index, row in timecard_listed_dates_df.iterrows():
         user_id, email, sender_name, dates = row['UserId'], row['Email'], row['Name'], row['NoSubmissionDates']
         
-        # Skips sending email if no missing dates and comments exist -> indicates prior error
-        if not dates and row['Comments'] != "":
+        # Skips sending email if no missing dates or comments exist (indicates prior error)
+        if len(dates) == 0 or row['Comments'] != "":
             timecard_listed_dates_df.at[index, 'lastUpdateDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
             continue
 
