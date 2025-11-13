@@ -4,6 +4,9 @@ import json
 import os
 from dotenv import load_dotenv
 import base64
+import pandas as pd
+from typing import List, Dict, Tuple
+import ast
  
 load_dotenv()
 CLIENT_ID = os.getenv('MICROSOFT_CLIENT_ID')
@@ -36,6 +39,49 @@ class EmailDraft:
             return False, message
 
         return True, result['access_token']
+
+    def statistics_generator(self, users: pd.DataFrame) -> tuple[pd.DataFrame, int, pd.Series, pd.DataFrame]:
+        """
+        Generate statistics on users with missing time sheet submissions.
+        
+        Args:
+        - users: DataFrame containing user data with 'NoSubmissionDates' column.
+
+        Returns:
+        - top_5_no_subs: DataFrame with top 5 users by missing submission count
+        - percentage_missing: Percentage of users with missing submissions
+        - most_frequent_day: Series of most frequently missed dates
+        - user_error_desc: DataFrame of users with errors
+        - file_path: Path to the generated bar graph image
+        """
+        # Top 5 users with most missing submissions
+        users['NoSubmissionCount'] = pd.to_numeric(users['NoSubmissionCount'], errors='coerce')
+        top_5 = users.nlargest(5, 'NoSubmissionCount')
+        top_5_no_subs = top_5[['Name', 'NoSubmissionDates', 'NoSubmissionCount']]
+
+        # Percentage of users with missing submissions
+        total_users = len(users)
+        users_with_missing_submissions = users[users['NoSubmissionCount'] > 0]
+        total_missing = len(users_with_missing_submissions)
+        percentage_missing = round((total_missing / total_users * 100), 2) if total_users > 0 else 0
+
+        # Most frequently missed dates (Series)
+        all_days = users['NoSubmissionDates'].explode()
+        days_count = all_days.value_counts()
+        
+        # Handle case where there are no missing dates
+        if len(days_count) > 0:
+            highest_count = days_count.max()
+            most_frequent_day = days_count[days_count == highest_count]
+        else:
+            most_frequent_day = pd.Series(dtype=int)  # Empty series
+
+        # Users with errors
+        users_with_errors = users[users['Comments'] != ""]
+        user_error_desc = users_with_errors[['Name', 'NoSubmissionDates', 'Comments']]
+
+        return top_5_no_subs, percentage_missing, most_frequent_day, user_error_desc
+
 
     def send_email(self, token, to_email, name, user_id, start_date, end_date, missing_dates) -> tuple[bool, str]:
         """
@@ -101,20 +147,63 @@ class EmailDraft:
         Args:
         - token: The access token for Microsoft Graph API.
         - to_email: The recipient's email address, admins.
-        - users: A dictionary mapping user IDs to their missing date ranges.
+        - users: Dataframe containing user data with 'NoSubmissionDates' column.
+        - firm_user_count: Total number of users in the firm.
         - start_date: Start date of the work week.
         - end_date: End date of the work week.
         """
 
         # This will contain a summary report of all users with missing submissions
-        body = "Dear Admin,\n\nThe following users have missing time sheet submissions for the work week:\n\n"
-        for index, row in users.iterrows():
-            name = row['Name']
-            missing_dates = row['NoSubmissionDates']
-            # Convert list to comma-separated string
-            missing_dates_str = ', '.join(missing_dates) if isinstance(missing_dates, list) else missing_dates
-            body += f"- Name: {name}, Missing Dates: {missing_dates_str}\n"
-        body += "\nPlease find the attached file for detailed information.\n\nBest regards,\nAlexandra Hernandez"
+        top_5_no_subs, percentage_missing, most_frequent_day, user_error_desc = self.statistics_generator(users)
+
+        # Format most frequently missed dates as comma-separated list
+        if len(most_frequent_day) > 0:
+            frequent_dates_str = ', '.join(most_frequent_day.index.astype(str))
+        else:
+            frequent_dates_str = "None"
+
+        # Format top 5 users
+        top_5_str = ""
+        if len(top_5_no_subs) > 0:
+            for index, row in top_5_no_subs.iterrows():
+                top_5_str += f"  - {row['Name']}: {row['NoSubmissionDates']}\n"
+        else:
+            top_5_str = "  None"
+
+        # Format users with errors - show name and comments only
+        if len(user_error_desc) > 0:
+            error_lines = []
+            for _, row in user_error_desc.iterrows():
+                name = row['Name']
+                comments = row['Comments']
+                error_lines.append(f"  - {name}: {comments}")
+            errors_str = '\n'.join(error_lines)
+        else:
+            errors_str = "  None"
+        
+        body = f"""Dear Admins,
+    Here is a summary for the recent time sheet submissions for the work week {start_date} to {end_date}:
+
+    - Top 5 Users with Most Missing Submissions:
+    {top_5_str}
+    - Percentage of Users with Missing Submissions: {percentage_missing}%
+    - Most Frequently Missed Date(s): {frequent_dates_str}
+    - Users with Errors:
+    {errors_str}
+
+    Please refer to the attached file for the full data from the work week.
+
+    Best regards,
+    Alexandra Hernandez"""
+
+        # body = "Dear Admins,\n\nThe following users have missing time sheet submissions for the work week:\n\n"
+        # for index, row in users.iterrows():
+        #     name = row['Name']
+        #     missing_dates = row['NoSubmissionDates']
+        #     # Convert list to comma-separated string
+        #     missing_dates_str = ', '.join(missing_dates) if isinstance(missing_dates, list) else missing_dates
+        #     body += f"- Name: {name}, Missing Dates: {missing_dates_str}\n"
+        # body += "\nPlease find the attached file for detailed information.\n\nBest regards,\nAlexandra Hernandez"
 
         subject = "Summary of Users with Missing Time Sheet Submissions for Work Week " + start_date + " to " + end_date
 
