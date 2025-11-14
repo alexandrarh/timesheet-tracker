@@ -148,12 +148,11 @@ class EmailDraft:
         - token: The access token for Microsoft Graph API.
         - to_email: The recipient's email address, admins.
         - users: Dataframe containing user data with 'NoSubmissionDates' column.
-        - firm_user_count: Total number of users in the firm.
         - start_date: Start date of the work week.
         - end_date: End date of the work week.
         """
 
-        # This will contain a summary report of all users with missing submissions
+        # Summary/statistics report of all users with missing submissions
         top_5_no_subs, percentage_missing, most_frequent_day, user_error_desc = self.statistics_generator(users)
 
         # Format most frequently missed dates as comma-separated list
@@ -163,47 +162,48 @@ class EmailDraft:
             frequent_dates_str = "None"
 
         # Format top 5 users
-        top_5_str = ""
+        top_5_html = ""
         if len(top_5_no_subs) > 0:
             for index, row in top_5_no_subs.iterrows():
-                top_5_str += f"  - {row['Name']}: {row['NoSubmissionDates']}\n"
+                top_5_html += f"                <li>{row['Name']}: {row['NoSubmissionDates']}</li>\n"
         else:
-            top_5_str = "  None"
+            top_5_html = "                <li>None</li>"
 
-        # Format users with errors - show name and comments only
+        # Format users with errors
         if len(user_error_desc) > 0:
-            error_lines = []
+            errors_html = ""
             for _, row in user_error_desc.iterrows():
                 name = row['Name']
                 comments = row['Comments']
-                error_lines.append(f"  - {name}: {comments}")
-            errors_str = '\n'.join(error_lines)
+                errors_html += f"                <li>{name}: {comments}</li>\n"
         else:
-            errors_str = "  None"
+            errors_html = "None"
         
-        body = f"""Dear Admins,
-    Here is a summary for the recent time sheet submissions for the work week {start_date} to {end_date}:
-
-    - Top 5 Users with Most Missing Submissions:
-    {top_5_str}
-    - Percentage of Users with Missing Submissions: {percentage_missing}%
-    - Most Frequently Missed Date(s): {frequent_dates_str}
-    - Users with Errors:
-    {errors_str}
-
-    Please refer to the attached file for the full data from the work week.
-
-    Best regards,
-    Alexandra Hernandez"""
-
-        # body = "Dear Admins,\n\nThe following users have missing time sheet submissions for the work week:\n\n"
-        # for index, row in users.iterrows():
-        #     name = row['Name']
-        #     missing_dates = row['NoSubmissionDates']
-        #     # Convert list to comma-separated string
-        #     missing_dates_str = ', '.join(missing_dates) if isinstance(missing_dates, list) else missing_dates
-        #     body += f"- Name: {name}, Missing Dates: {missing_dates_str}\n"
-        # body += "\nPlease find the attached file for detailed information.\n\nBest regards,\nAlexandra Hernandez"
+        body = f"""<html>
+        <body style="font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #333;">
+            <p>Dear Admins,</p>
+            <p>Here is a summary for the recent time sheet submissions for the work week <strong>{start_date} to {end_date}</strong>:</p>
+            
+            <ul style="line-height: 1.5;">
+                <li><strong>Top 5 Users with Most Missing Submissions:</strong>
+                    <ul>
+        {top_5_html}
+                    </ul>
+                </li>
+                <li><strong>Percentage of Users with Missing Submissions:</strong> {percentage_missing}%</li>
+                <li><strong>Most Frequently Missed Date(s):</strong> {frequent_dates_str}</li>
+                <li><strong>Users with Errors:</strong>
+                    {'<ul>' if len(user_error_desc) > 0 else ''}
+        {errors_html if len(user_error_desc) > 0 else '            None'}
+                    {'</ul>' if len(user_error_desc) > 0 else ''}
+                </li>
+            </ul>
+            
+            <p>Please refer to the attached file for the full data from the work week.</p>
+            
+            <p>Best regards,<br>Alexandra Hernandez</p>
+        </body>
+        </html>"""
 
         subject = "Summary of Users with Missing Time Sheet Submissions for Work Week " + start_date + " to " + end_date
 
@@ -229,7 +229,7 @@ class EmailDraft:
             'message': {
                 'subject': subject,
                 'body': {
-                    'contentType': 'Text',
+                    'contentType': 'HTML', 
                     'content': body
                 },
                 'toRecipients': to_recipients,
@@ -256,18 +256,5 @@ class EmailDraft:
         
         status = True
         message_str = f"Email sent successfully."
+        os.remove('missing_time_sheets_summary.csv')    # Clean up the attachment file
         return status, message_str
-
-# def main():
-#     token = EmailDraft.get_access_token()
-#     send_email = EmailDraft.send_email(
-#         token=token,
-#         to_email=SENDER_EMAIL,
-#         name='Jane Doe',
-#         start_date='2025-10-27',
-#         end_date='2025-10-31',
-#         missing_dates=['2025-10-28', '2025-10-29']  # Example dates
-#     )
-
-# if __name__ == "__main__":
-#     main()
