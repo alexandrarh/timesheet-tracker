@@ -108,7 +108,7 @@ def main():
     start_date, end_date = get_start_and_end_week_dates()
     logger.info(f"Fetching timecards from {start_date} to {end_date}...")
 
-    # Create dataframe that contains user ID and dates with submission of timecard for each day -> this will be created into XLSX/CSV later
+    # Create dataframe that contains user ID and dates with submission of timecard for each day
     basic_columns = ['UserId', 'Email', 'Name']
     work_week_dates = get_work_week_dates()
     column_list = basic_columns + work_week_dates
