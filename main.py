@@ -241,20 +241,11 @@ def main():
             time.sleep(2)
     if not status:
         logger.error(f"Failed to send summary email to admins: {message}. Exceeded maximum retries.")
-        return  # Change to continue when there's more admins
+        return  
         
     logger.info("Main process completed successfully. Successfully exiting.")
 
-    # NOTE: Should there be a generated summary report df, then it's appended to existing data?
-    # Database with these collections: user information (e.g. id, name, email), dates with no submission 
-    # Dates with no submission: user_id, dates (lists of dates with no submission) -> How do we want to update this when dates are filled in later?
-    # Probably will need to build a checker bot that checks for filled-in dates and updates the database accordingly
-    
-    # Output the dataframe to a CSV for record-keeping -> keep in production repo (in file) -> should be keep emails in or no
-    # saved_data = timecard_listed_dates_df.drop(['Email', 'Name'], axis=1)
-    # csv_filename = f"artifacts/timecard_submissions_{start_date}_to_{end_date}.csv"
-    # saved_data.to_csv(csv_filename, index=False)
-    # logger.info(f"Timecard submission data saved to {csv_filename}")
+    # NOTE: Will need to add to database in future for tracking purposes
 
 if __name__ == "__main__":
     main()
