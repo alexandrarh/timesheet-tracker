@@ -165,7 +165,7 @@ class EmailDraft:
         top_5_html = ""
         if len(top_5_no_subs) > 0:
             for index, row in top_5_no_subs.iterrows():
-                top_5_html += f"                <li>{row['Name']}: {row['NoSubmissionDates']}</li>\n"
+                top_5_html += f"                <li><strong>{row['Name']}</strong>: {row['NoSubmissionDates']}</li>\n"
         else:
             top_5_html = "                <li>None</li>"
 
@@ -175,7 +175,7 @@ class EmailDraft:
             for _, row in user_error_desc.iterrows():
                 name = row['Name']
                 comments = row['Comments']
-                errors_html += f"                <li>{name}: {comments}</li>\n"
+                errors_html += f"                <li><strong>{name}</strong>: {comments}</li>\n"
         else:
             errors_html = "None"
         
