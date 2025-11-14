@@ -112,7 +112,7 @@ def main():
     basic_columns = ['UserId', 'Email', 'Name']
     work_week_dates = get_work_week_dates()
     column_list = basic_columns + work_week_dates
-    listed_dates_columns = basic_columns + ['NoSubmissionDates', 'lastEmailSentDate', 'lastUpdateDate', 'Comments']
+    listed_dates_columns = basic_columns + ['NoSubmissionDates', 'NoSubmissionCount', 'lastEmailSentDate', 'lastUpdateDate', 'Comments']
 
     timecard_tracker_df = pd.DataFrame(columns=column_list)
     timecard_listed_dates_df = pd.DataFrame(columns=listed_dates_columns)
@@ -146,6 +146,7 @@ def main():
         if isinstance(timecards, str):
             logger.error(f"Error fetching timecards for user {user['Id']}: {timecards}")
             timecard_listed_dates_row['NoSubmissionDates'] = []
+            timecard_listed_dates_row['NoSubmissionCount'] = 0
             timecard_listed_dates_row['Comments'] = timecards
             timecard_listed_dates_df = pd.concat([timecard_listed_dates_df, pd.DataFrame([timecard_listed_dates_row])], ignore_index=True)
             continue
@@ -163,6 +164,7 @@ def main():
 
         timecard_missing_dates = [date_str for date_str in work_week_dates if timecard_row[date_str] == 0]
         timecard_listed_dates_row['NoSubmissionDates'] = timecard_missing_dates
+        timecard_listed_dates_row['NoSubmissionCount'] = len(timecard_missing_dates)
 
         # Append row to dataframe - convert dict to DataFrame first
         timecard_tracker_df = pd.concat([timecard_tracker_df, pd.DataFrame([timecard_row])], ignore_index=True)
@@ -241,8 +243,7 @@ def main():
         logger.error(f"Failed to send summary email to admins: {message}. Exceeded maximum retries.")
         return  # Change to continue when there's more admins
         
-    logger.info("Main process completed successfully.")
-    os.remove('missing_time_sheets_summary.csv') 
+    logger.info("Main process completed successfully. Successfully exiting.")
 
     # NOTE: Should there be a generated summary report df, then it's appended to existing data?
     # Database with these collections: user information (e.g. id, name, email), dates with no submission 
