@@ -6,6 +6,7 @@ from typing import List, Dict, Set, Optional
 import json
 from urllib.parse import urlencode
 from dotenv import load_dotenv
+import pandas as pd
  
 # Loading environment variables from a .env file
 load_dotenv()
@@ -131,9 +132,24 @@ def main():
 
     # Testing get all firm users
     firm_users = get_firm_users(access_token)
+    firm_list = []
     for user in firm_users:
-        # if user['Id'] == 92915:
-        print(f"User ID: {user['Id']}, Email: {user['Email']}, Name: {user['FirstName'].strip()} {user['LastName'].strip()}")
+        if user['Id'] == 87002:
+            continue
+
+        firm_list.append({
+            "UserId": user['Id'],
+            "Email": user['Email'],
+            "FirstName": user['FirstName'].strip(),
+            "LastName": user['LastName'].strip(),
+            "UserStatus": user['UserStatus'],
+            "EmploymentStatus": user['EmploymentStatus'],
+            "LastUpdated": user['LastUpdatedDate']
+        })
+
+    firm_df = pd.DataFrame(firm_list)
+    print(firm_df)
+    firm_df.to_csv('firm_users.csv', index=False)
 
     # Testing search timecards
     # def get_start_and_end_week_dates():
