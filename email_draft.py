@@ -16,7 +16,12 @@ SENDER_EMAIL = os.getenv('SENDER_EMAIL')
 
 class EmailDraft:
     def get_access_token(self) -> tuple[bool, str]:
-        """Authenticate with Microsoft Graph API to get token."""
+        """
+        Authenticate with Microsoft Graph API to get token.
+
+        Returns:
+        - A tuple containing a boolean indicating success, and the access token or error message.
+        """
         authority = f"https://login.microsoftonline.com/{TENANT_ID}"
 
         app = msal.ConfidentialClientApplication(
@@ -95,6 +100,9 @@ class EmailDraft:
         - start_date: Start date of the work week.
         - end_date: End date of the work week.
         - missing_dates: List of dates with missing time sheet submissions.
+
+        Returns:
+        - A tuple containing a boolean indicating success, and a message string.
         """
 
         body = f"Dear {name},\n\nOur records indicate that you have not submitted your time sheets for the following dates in the current work week:\n"
@@ -150,6 +158,9 @@ class EmailDraft:
         - users: Dataframe containing user data with 'NoSubmissionDates' column.
         - start_date: Start date of the work week.
         - end_date: End date of the work week.
+
+        Returns:
+        - A tuple containing a boolean indicating success, and a message string.
         """
 
         # Summary/statistics report of all users with missing submissions

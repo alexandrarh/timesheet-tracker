@@ -22,7 +22,13 @@ class TimeSolveAuth:
         self.redirect_uri = REDIRECT_URI
 
     def get_access_token(self) -> tuple[bool, str]:
-        """Exchange authorization code for access token."""
+        """
+        Exchange authorization code for access token.
+        
+        Returns:
+        - A tuple containing a boolean indicating success, and the access token or error message.
+        """
+
         access_data = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
@@ -50,7 +56,8 @@ class TimeSolvAPI:
         }
 
     def get_all_firm_users(self) -> List[Dict] | str:
-        """Fetch all users associated with the firm.
+        """
+        Fetch all users associated with the firm.
         
         Returns:
         - A list of dictionaries containing user details.
