@@ -3,6 +3,7 @@ name: Timesheet Tracker Action
 on:
   schedule:
     - cron: '0 1 * * 6'  # 1 AM UTC Saturday = 8 PM EST Friday
+  workflow_dispatch:
 
 jobs:
   check-timesheets:
