@@ -49,25 +49,8 @@ This program can be ran locally **and/or** with automation, please refer to each
 ```shell
 pip install -r requirements.txt
 ```
-6. Configure your `.env` file (must be created in repository on local). Follow the format below for optimal usage. 
-```shell
-# Email configuration
-MICROSOFT_CLIENT_SECRET = [Client secret value]
-MICROSOFT_CLIENT_ID = [Application identifier]
-MICROSOFT_TENANT_ID = [Azure AD tenant ID]
+6. Configure your `.env` file (must be created in repository on local). For an example on formatting, refer to [.env.example](/.env.example) in this repository.
 
-# TimeSolv API secrets
-REDIRECT_URI = [Redirect URI, can be localhost]
-TIMESOLV_CLIENT_ID = [TimeSolv client ID obtained from registering app]
-TIMESOLV_CLIENT_SECRET = [TimeSolv client secret obtained from registering app]
-TIMESOLV_AUTH_CODE = [Auth code obtained from running TimeSolv developer set up]
-
-# Misc/for testing
-USER_ID = [Personal Timesolv User ID, your own]
-SENDER_EMAIL = [Outlook email address]     
-ADMIN_EMAILS = [List of admin email addresses for summary reports]
-EXCLUDE_USER_IDS = [List of Timesolv User IDs to exclude from processing]
-```
 **NOTE:** Refer to [Configuration Guide](#configuration-guide) below on `.env` setup and obtaining proper keys for TimeSolv and Microsoft Graph API.
 
 7. Use the following command into the terminal to run the local/test program, `local_test.py`
