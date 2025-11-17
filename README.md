@@ -23,7 +23,7 @@ This program can be ran locally **and/or** with automation, please refer to each
 
 ### Running on local environment (for testing purposes)
 1. Clone the repository onto local environment. <br>
-     <br><img src="images/clone.png" alt="Alt Text" style="width:30%; height:auto;"></br>
+     <img src="images/clone.png" alt="Alt Text" style="width:50%; height:auto;">
 2. Something
 
 ### Running on production environment
