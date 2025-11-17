@@ -67,6 +67,7 @@ To run this program on a production environment, follow the steps below.
 3. Click on "New repository secret" to add the necessary production keys/secrets.
     <p><img src="images/secrets.png" alt="Adding a new secret" style="width:45%; height:auto;"></p>
 **NOTE:** To find what secrets/key names are needed for the environment, refer to [.env.example](/.env.example) for the proper names.
+
 4. Once the production keys/secrets are added, navigate to the "Code and automation" section (still in **Settings**), going to the "Actions" drop down. Click on "General."
 5. Scroll down to "Workflow permissions" and enable the "Read and write permissions" by pressing that option, and check the "Allow GitHub Actions to create and approve pull requests" box to ensure that the `status.log` commits are successfully pushed to the repo (when the program runs).
 6. Adjust the workflow schedule by navigating to the [actions.yaml](.github/workflows/actions.yaml) in the repository, and modifying the `schedule` section as shown below.
