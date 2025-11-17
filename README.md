@@ -24,9 +24,9 @@ This program can be ran locally **and/or** with automation, please refer to each
 
 ### Running on local environment (for testing purposes)
 1. Clone the repository onto local environment. 
-    <br><p><img src="images/clone.png" alt="Alt Text" style="width:45%; height:auto;"></p></br>
+    <p><img src="images/clone.png" alt="Alt Text" style="width:45%; height:auto;"></p>
 2. Open the repository on IDE (preferrably Visual Studio Code) and open a New Terminal.
-    <br><p><img src="images/terminal.png" alt="Alt Text" style="width:40%; height:auto;"></p></br>
+    <p><img src="images/terminal.png" alt="Alt Text" style="width:40%; height:auto;"></p>
 3. In the terminal, create the virtual environment using the following command(s).
     #### If using bash/zsh
     ```shell
