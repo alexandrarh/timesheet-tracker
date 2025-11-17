@@ -12,6 +12,7 @@ The workflow fetches user information and timesheet data from TimeSolv and user 
 
 ## Prerequisites
 In order to run the TimeSolv Timesheet Tracker, these components are required:
+- Python 3.12+
 - TimeSolv firm **and** developer account
     - Will need `client_id`, `client_secret`, `redirect_uri`, and `auth_code`
 - Microsoft Graph API account (with global administrator permissions)
@@ -23,7 +24,48 @@ This program can be ran locally **and/or** with automation, please refer to each
 
 ### Running on local environment (for testing purposes)
 1. Clone the repository onto local environment. <br>
-     <img src="images/clone.png" alt="Alt Text" style="width:50%; height:auto;">
-2. Something
+     <img src="images/clone.png" alt="Alt Text" style="width:45%; height:auto;">
+2. Open the repository on IDE (preferrably Visual Studio Code) and open a New Terminal.
+    <img src="images/terminal.png" alt="Alt Text" style="width:40%; height:auto;">
+3. In the terminal, create the virtual environment using the following command(s).
+    #### If using bash/zsh
+    ```shell
+    python3 -m venv .venv
+    ```
+    #### If using Windows
+    ```bat
+    c:\>c:\Python35\python -m venv .venv
+    ```
+4. Activate the virtual environment with the following command(s).
+    #### If using bash/zsh
+    ```shell
+    source .venv/bin/activate
+    ```
+    #### If using Windows
+    ```bat
+    C:\> .venv\Scripts\activate.bat
+    ```
+5. Install the proper packages from `requirements.txt` in the terminal with the following command.
+```shell
+pip install -r requirements.txt
+```
+6. Configure your `.env` file (must be created in repository on local). Follow the format below for optimal usage.
+```shell
+# Email configuration
+MICROSOFT_CLIENT_SECRET = [Client secret value]
+MICROSOFT_CLIENT_ID = [Application identifier]
+MICROSOFT_TENANT_ID = [Azure AD tenant ID]
+
+# TimeSolv API secrets
+REDIRECT_URI = [Redirect URI, can be localhost]
+TIMESOLV_CLIENT_ID = [TimeSolv client ID obtained from registering app]
+TIMESOLV_CLIENT_SECRET = [TimeSolv client secret obtained from registering app]
+TIMESOLV_AUTH_CODE = [Auth code obtained from running TimeSolv developer set up]
+
+# Misc/for testing
+USER_ID = [Personal Timesolv User ID, your own]
+SENDER_EMAIL = [Outlook email address]     
+ADMIN_EMAILS = [List of admin email addresses for summary reports]
+```
 
 ### Running on production environment
