@@ -211,7 +211,6 @@ __marimo__/
 .DS_Store
 secrets.md
 status_test.log
-local_test.py
 timesheet_summary_sample.csv
 
 # Excluded files
