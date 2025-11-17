@@ -23,10 +23,10 @@ In order to run the TimeSolv Timesheet Tracker, these components are required:
 This program can be ran locally **and/or** with automation, please refer to each section based on your needs. 
 
 ### Running on local environment (for testing purposes)
-1. Clone the repository onto local environment. <br>
-     <img src="images/clone.png" alt="Alt Text" style="width:45%; height:auto;">
+1. Clone the repository onto local environment. 
+    <br><p><img src="images/clone.png" alt="Alt Text" style="width:45%; height:auto;"></p></br>
 2. Open the repository on IDE (preferrably Visual Studio Code) and open a New Terminal.
-    <img src="images/terminal.png" alt="Alt Text" style="width:40%; height:auto;">
+    <br><p><img src="images/terminal.png" alt="Alt Text" style="width:40%; height:auto;"></p></br>
 3. In the terminal, create the virtual environment using the following command(s).
     #### If using bash/zsh
     ```shell
@@ -49,7 +49,7 @@ This program can be ran locally **and/or** with automation, please refer to each
 ```shell
 pip install -r requirements.txt
 ```
-6. Configure your `.env` file (must be created in repository on local). Follow the format below for optimal usage.
+6. Configure your `.env` file (must be created in repository on local). Follow the format below for optimal usage. 
 ```shell
 # Email configuration
 MICROSOFT_CLIENT_SECRET = [Client secret value]
@@ -66,6 +66,15 @@ TIMESOLV_AUTH_CODE = [Auth code obtained from running TimeSolv developer set up]
 USER_ID = [Personal Timesolv User ID, your own]
 SENDER_EMAIL = [Outlook email address]     
 ADMIN_EMAILS = [List of admin email addresses for summary reports]
+EXCLUDE_USER_IDS = [List of Timesolv User IDs to exclude from processing]
+```
+**NOTE:** Refer to [Configuration Guide](#configuration-guide) below on `.env` setup and obtaining proper keys for TimeSolv and Microsoft Graph API.
+
+7. Use the following command into the terminal to run the local/test program, `local_test.py`
+```shell
+python local_test.py
 ```
 
 ### Running on production environment
+
+## Configuration Guide
