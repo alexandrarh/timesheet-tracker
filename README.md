@@ -17,4 +17,13 @@ In order to run the TimeSolv Timesheet Tracker, these components are required:
 - Microsoft Graph API account (with global administrator permissions)
     - Will need `client_id`, `client_secret`, and `tenant_id`
 - GitHub repository (to run automation)
-- `requirements.txt`
+
+## Set up 
+This program can be ran locally **and/or** with automation, please refer to each section based on your needs. 
+
+### Running on local environment (for testing purposes)
+1. Clone the repository onto local environment. <br>
+     <br><img src="images/clone.png" alt="Alt Text" style="width:30%; height:auto;"></br>
+2. Something
+
+### Running on production environment
