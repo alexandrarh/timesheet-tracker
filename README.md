@@ -61,7 +61,7 @@ python local_test.py
 ### Running on production environment
 To run this program on a production environment, follow the steps below.
 1. Fork the `timesheet-tracker` repo onto the preferred account.
-    <p><figure><img src="images/fork_1.png" alt="Navigating creating a new fork" style="width:45%; height:auto;"><figcaption>Navigating creating a new fork</figcaption></figure></p>
-    <p><figure><img src="images/fork_2.jpg" alt="Creating a new fork" style="width:45%; height:auto;"><figcaption>Creating a new fork</figcaption></figure></p>
+    <p><img src="images/fork_1.png" alt="Navigating creating a new fork" style="width:45%; height:auto;"></p>
+    <p><img src="images/fork_2.jpg" alt="Creating a new fork" style="width:45%; height:auto;"></p>
 
 ## Configuration Guide
