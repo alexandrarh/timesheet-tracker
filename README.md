@@ -22,7 +22,7 @@ In order to run the TimeSolv Timesheet Tracker, these components are required:
 ## Set up 
 This program can be ran locally **and/or** with automation, please refer to each section based on your needs. For any aspects requiring production keys/secrets, refer to the [Configuration Guide](#configuration-guide) for obtaining proper keys/secrets needed for TimeSolv and Microsoft Graph API.
 
-### Running on local environment (for testing purposes)
+### Run on local environment (for testing purposes)
 To run the program locally, follow the steps below.
 1. Clone the repository onto local environment. 
     <p><img src="images/clone.png" alt="Cloning the repo" style="width:45%; height:auto;"></p>
@@ -58,7 +58,7 @@ python local_test.py
 ```
 **NOTE**: When running the program, a `status_test.log` should be created, and it will contain any logs/output generated from the local test. There should also be two emails sent to the specified email(s) in the `.env` file (`SENDER_EMAIL` and `ADMIN_EMAILS` variables).
 
-### Running on production environment
+### Run on production environment
 To run this program on a production environment, follow the steps below.
 1. Fork the `timesheet-tracker` repo onto the preferred account.
     <p><img src="images/fork_1.png" alt="Navigating creating a new fork" style="width:45%; height:auto;"></p>
@@ -82,3 +82,120 @@ on:
 By following these instructions, the production setup should be complete, and will run based on the specified schedule.
 
 ## Configuration Guide
+In order to run the TimeSolv Timesheet Tracker on a local or production environment, the following keys/secrets will need to be acquired.
+- `MICROSOFT_CLIENT_SECRET` 
+- `MICROSOFT_CLIENT_ID`
+- `MICROSOFT_TENANT_ID`
+- `REDIRECT_URI`
+- `TIMESOLV_CLIENT_ID`
+- `TIMESOLV_CLIENT_SECRET`
+- `TIMESOLV_AUTH_CODE`
+
+For anything pertaining to TimeSolv, refer to <a href="https://help.timesolv.com/connect-to-timesolv-with-rest-api">TimeSolv's REST API Integration documentation</a> steps. <br>
+**NOTE:** For the `REDIRECT_URI` variable, using `'http://localhost:8080/callback'` is allowable.
+
+For Microsoft's Graph API (part of Outlook), refer to their <a href="https://learn.microsoft.com/en-us/graph/auth-register-app-v2">Authentication and Authorization</a> documentation. You can also utilize their <a href="https://developer.microsoft.com/en-us/graph/quick-start">Quick Start</a> to navigate the basics of their platform and its usage in the program.
+
+### Email Configuration
+- `SENDER_EMAIL`: The time administrator's email address (emails will be sent "from" this address)
+- `ADMIN_EMAILS`: Comma-separated list of administrator emails to receive summary reports
+
+## Troubleshooting
+Below is a troubleshooting guide on navigating any program issues that may arise.
+
+### TimeSolv API Issues
+**Authentication Failed**
+- Verify `TIMESOLV_CLIENT_ID`, `TIMESOLV_CLIENT_SECRET`, and `TIMESOLV_AUTH_CODE` are correct
+- Authorization codes expire quickly. Generate a new `TIMESOLV_AUTH_CODE` if you get `401`/`403` errors
+- Ensure your TimeSolv developer account has proper API access enabled
+- Check that `REDIRECT_URI` matches exactly what's configured in TimeSolv (including `http://localhost:8080/callback`)
+
+**No Timesheet Data Returned**
+- Confirm your TimeSolv account has access to view firm-wide timesheet data
+- Verify the date range being queried includes workdays
+- Check that users exist in both TimeSolv and your firm's system
+
+### Microsoft Graph API Issues
+**Rate Limit Errors (HTTP 429)**
+- The Graph API has throttling limits (~2,000 requests per second per app)
+- The script automatically retries after the time specified in the `Retry-After` header
+- For large organizations, consider staggering notification emails
+
+**Authentication Failed**
+- Verify all three required secrets are set:
+  - `MICROSOFT_CLIENT_ID`: Your Azure AD application (client) ID
+  - `MICROSOFT_CLIENT_SECRET`: Your app's client secret value
+  - `MICROSOFT_TENANT_ID`: Your Azure AD tenant (directory) ID
+- Ensure secrets have no extra spaces or line breaks
+
+**Insufficient Permissions Error**
+- The Azure AD app registration requires these Application permissions:
+  - `User.Read.All`: To fetch user information
+  - `Mail.Send`: To send emails on behalf of users
+- A Global Administrator must grant admin consent for these permissions
+- Verify in: Azure Portal → App Registrations → Your App → API Permissions
+
+**Client Secret Expired**
+- Client secrets expire after 1-2 years (check expiration in Azure Portal)
+- Generate new secret: Azure Portal → App Registrations → Your App → Certificates & Secrets
+- Update `MICROSOFT_CLIENT_SECRET` with the new value
+
+**Emails Not Sending**
+- Confirm `SENDER_EMAIL` is set to a valid user email in your Microsoft 365 tenant
+- This email address will appear as the sender of all timesheet notifications
+- Verify the email has no typos and matches the time administrator's address
+
+### GitHub Actions Issues
+**Workflow Not Running**
+- Check that "Read and write permissions" are enabled in Settings → Actions → General
+- Verify the cron schedule syntax is correct (test at [crontab.cronhub.io](https://crontab.cronhub.io/))
+- Manually trigger workflow using "Run workflow" button in Actions tab to test
+
+**Status Log Not Committing**
+- Ensure "Allow GitHub Actions to create and approve pull requests" is checked
+- Verify the GitHub Actions bot has write access to the repository
+- Check Actions logs for any git commit errors
+
+**Secrets Not Working**
+- Repository secrets must match exact names from `.env.example` (case-sensitive)
+- Secrets are not visible after creation; if unsure, delete and recreate
+- Ensure no extra quotes around secret values when pasting
+
+### General Debugging
+**Enable Verbose Logging**
+- Run `local_test.py` to see detailed logs in `status_test.log`
+- Check for specific API error messages and status codes
+- Common status codes:
+  - `401`: Authentication failed
+  - `403`: Insufficient permissions
+  - `429`: Rate limit exceeded
+  - `500`: Server error (retry or contact API support)
+
+## Output/Products of Program
+When the Timesheet Tracker runs successfully, it produces the following.
+
+1. **Individual User Notifications**: Emails sent to employees with missing timesheet entries.
+   - Lists specific dates with missing timesheets
+   - Sent from the configured `SENDER_EMAIL` address
+   - Helps employees catch up on incomplete submissions
+
+2. **Admin Summary Report**: Comprehensive email sent to administrators (specified in `ADMIN_EMAILS`).
+   - Overview of all users with missing timesheets
+   - Count of missing dates per user
+   - Sent after individual notifications complete
+
+3. **Status Logs**: Detailed execution logs for debugging and auditing; contains timestamps, API calls, and any errors encountered.
+   - `status.log` (production): Committed to the repository after each run
+   - `status_test.log` (local testing): Created in local directory
+
+### Example Email Structure
+#### User Email
+Below is what a user will receive if they are missing a date in their timesheet.
+<p><img src="images/user_email_sample.png" alt="User-received email" style="width:45%; height:auto;"></p>
+
+#### Summary Email
+Below is what admins will receive at the end of the workflow to their email.
+<p><img src="images/summary_email_sample.png" alt="Admin-received summary email" style="width:45%; height:auto;"></p>
+
+## Contact
+If there are any other questions/concerns, please reach out to <a href="mailto:alexavndrarh@gmail.com">alexavndrarh@gmail.com</a> for help.
