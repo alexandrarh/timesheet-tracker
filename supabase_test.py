@@ -80,5 +80,7 @@ try:
         .eq("UserId", 11111)
         .execute()
     )
+
+
 except Exception as e:
     print(f"Error with Supabase client: {e}")
