@@ -212,7 +212,7 @@ __marimo__/
 secrets.md
 status_test.log
 timesheet_summary_sample.csv
-email_draft.py
+test_files_etc/
 email_test.py
 logger_dev.py
 notes.md
