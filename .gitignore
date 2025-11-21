@@ -212,6 +212,11 @@ __marimo__/
 secrets.md
 status_test.log
 timesheet_summary_sample.csv
+email_draft.py
+email_test.py
+logger_dev.py
+notes.md
+api_parts_test.py
 
 # Excluded files
 !status.log
