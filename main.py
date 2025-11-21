@@ -3,10 +3,9 @@ import logging
 import logging.handlers
 from datetime import date, timedelta, datetime
 from zoneinfo import ZoneInfo
-from typing import List, Dict, Set, Optional
+from typing import List, Dict
 import time
 import os
-import json
 import pandas as pd
 from email_draft import EmailDraft
 from dotenv import load_dotenv
