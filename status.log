@@ -35,3 +35,29 @@
 2025-11-06 09:10:34,567 - __main__ - INFO - Fetching timecards from 2025-11-03 to 2025-11-07...
 2025-11-06 09:10:35,682 - __main__ - INFO - Excluding user 87002 from tracking as per exclusion list.
 2025-11-06 09:10:37,556 - __main__ - INFO - Timecard submission data saved to artifacts/timecard_submissions_2025-11-03_to_2025-11-07.csv
+2025-11-22 02:22:36,291 - __main__ - INFO - Starting main process...
+2025-11-22 02:22:36,484 - __main__ - INFO - Successfully obtained TimeSolv access token on attempt 1.
+2025-11-22 02:22:36,774 - __main__ - INFO - Successfully obtained firm users on attempt 1.
+2025-11-22 02:22:36,778 - __main__ - INFO - Fetching timecards from 2025-11-17 to 2025-11-21...
+2025-11-22 02:22:37,003 - __main__ - INFO - Successfully obtained timecards for user 95883 on attempt 1.
+2025-11-22 02:22:37,191 - __main__ - INFO - Successfully obtained timecards for user 93812 on attempt 1.
+2025-11-22 02:22:37,379 - __main__ - INFO - Successfully obtained timecards for user 92915 on attempt 1.
+2025-11-22 02:22:37,580 - __main__ - INFO - Successfully obtained timecards for user 89053 on attempt 1.
+2025-11-22 02:22:37,582 - __main__ - INFO - Excluding user 87002 from tracking as per exclusion list.
+2025-11-22 02:22:37,856 - __main__ - INFO - Successfully obtained timecards for user 57139 on attempt 1.
+2025-11-22 02:22:38,023 - __main__ - INFO - Successfully obtained timecards for user 31231 on attempt 1.
+2025-11-22 02:22:38,306 - __main__ - INFO - Successfully obtained timecards for user 30847 on attempt 1.
+2025-11-22 02:22:38,480 - __main__ - INFO - Successfully obtained timecards for user 30378 on attempt 1.
+2025-11-22 02:22:38,649 - __main__ - INFO - Successfully obtained timecards for user 11525 on attempt 1.
+2025-11-22 02:22:38,651 - __main__ - INFO - Processed 10 users. 0 failed.
+2025-11-22 02:22:39,116 - __main__ - INFO - Successfully obtained Microsoft Graph access token on attempt 1.
+2025-11-22 02:22:39,760 - __main__ - INFO - Successfully sent email to user 95883 on attempt 1.
+2025-11-22 02:22:40,011 - __main__ - INFO - Successfully sent email to user 93812 on attempt 1.
+2025-11-22 02:22:40,393 - __main__ - INFO - Successfully sent email to user 89053 on attempt 1.
+2025-11-22 02:22:40,648 - __main__ - INFO - Successfully sent email to user 57139 on attempt 1.
+2025-11-22 02:22:40,871 - __main__ - INFO - Successfully sent email to user 31231 on attempt 1.
+2025-11-22 02:22:41,159 - __main__ - INFO - Successfully sent email to user 30847 on attempt 1.
+2025-11-22 02:22:41,361 - __main__ - INFO - Successfully sent email to user 30378 on attempt 1.
+2025-11-22 02:22:41,594 - __main__ - INFO - Successfully sent email to user 11525 on attempt 1.
+2025-11-22 02:22:41,967 - __main__ - INFO - Successfully sent summary email to admins on attempt 1.
+2025-11-22 02:22:41,967 - __main__ - INFO - Main process completed successfully. Successfully exiting.
