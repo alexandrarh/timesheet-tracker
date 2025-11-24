@@ -217,6 +217,7 @@ email_test.py
 logger_dev.py
 notes.md
 api_parts_test.py
+supabase_test.py
 
 # Excluded files
 !status.log
