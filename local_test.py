@@ -5,12 +5,12 @@ from datetime import date, timedelta, datetime
 from zoneinfo import ZoneInfo
 import time
 import os
-import json
 import pandas as pd
 from email_draft import EmailDraft
 from dotenv import load_dotenv
-from typing import List, Dict, Set, Optional
+from typing import List, Dict
 import ast
+from supabase_api import SupabaseAPI
 
 load_dotenv()
 ADMIN_EMAILS = ast.literal_eval(os.getenv('ADMIN_EMAILS'))
@@ -192,7 +192,17 @@ def main():
 
     # Sending out email to test user only
     for attempt in range(1, MAX_RETRIES + 1):
-        email, sender_name, dates = timecard_listed_dates_df.loc[timecard_listed_dates_df['UserId'] == USER_ID, ['Email', 'Name', 'NoSubmissionDates']].values[0]
+        user_data = timecard_listed_dates_df.loc[timecard_listed_dates_df['UserId'] == int(USER_ID), ['Email', 'Name', 'NoSubmissionDates']]
+    
+        # Check if we found the user
+        if user_data.empty:
+            logger.error(f"User {USER_ID} not found in timecard_listed_dates_df")
+            logger.debug(f"Available UserIds: {timecard_listed_dates_df['UserId'].unique()}")
+            return
+        
+        # Now safely unpack
+        email, sender_name, dates = user_data.values[0]
+
         status, message = email_draft.send_email(
             token=access_token,
             to_email=email,                                         
@@ -216,6 +226,7 @@ def main():
     timecard_listed_dates_df.loc[timecard_listed_dates_df['UserId'] == USER_ID, 'lastEmailSentDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
     timecard_listed_dates_df.loc[timecard_listed_dates_df['UserId'] == USER_ID, 'lastUpdateDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
 
+    # Sending out summary email to admins
     for attempt in range(1, MAX_RETRIES + 1):
         status, message = email_draft.summary_email(
             token=access_token,
@@ -234,16 +245,19 @@ def main():
             time.sleep(2)
     if not status:
         logger.error(f"Failed to send summary email to admins: {message}. Exceeded maximum retries.")
-        return  # Change to continue when there's more admins
+        return
         
-    logger.info("Main process completed successfully.")
-    os.remove('missing_time_sheets_summary.csv') 
+    # Update Supabase with latest info for test user only
+    supabase_api = SupabaseAPI()
+    try:
+        update_response = supabase_api.update_dates(
+            data=timecard_listed_dates_df[timecard_listed_dates_df['UserId'] == int(USER_ID)]
+        )
+        logger.info(f"Supabase update response for user {USER_ID}: {update_response}")
+    except Exception as e:
+        logger.error(f"Error updating Supabase for user {USER_ID}: {e}")
     
-    # Output the dataframe to a CSV for record-keeping -> keep in production repo (in file) -> should be keep emails in or no
-    # saved_data = timecard_listed_dates_df.drop(['Email', 'Name'], axis=1)
-    # csv_filename = f"artifacts/timecard_submissions_{start_date}_to_{end_date}.csv"
-    # saved_data.to_csv(csv_filename, index=False)
-    # logger.info(f"Timecard submission data saved to {csv_filename}")
+    logger.info("Main process completed successfully.")
 
 if __name__ == "__main__":
     main()
