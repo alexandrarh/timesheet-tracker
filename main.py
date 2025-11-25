@@ -10,6 +10,7 @@ import pandas as pd
 from email_draft import EmailDraft
 from dotenv import load_dotenv
 import ast
+from supabase_api import SupabaseAPI
 
 load_dotenv()
 ADMIN_EMAILS = ast.literal_eval(os.getenv('ADMIN_EMAILS'))
@@ -241,6 +242,22 @@ def main():
     if not status:
         logger.error(f"Failed to send summary email to admins: {message}. Exceeded maximum retries.")
         return  
+
+    # Update Supabase with latest info
+    for attempt in range(1, MAX_RETRIES + 1):
+        supabase_api = SupabaseAPI()
+        try:
+            update_response = supabase_api.update_dates(data=timecard_listed_dates_df)
+            logger.info(f"Supabase update response: {update_response}")
+            break
+        except Exception as e:
+            logger.error(f"Error updating Supabase on attempt {attempt}: {e}")
+            if attempt < MAX_RETRIES:
+                logger.warning(f"Retrying Supabase update...")
+                time.sleep(2)
+    else:
+        logger.error("Exceeded maximum retries for Supabase update. Now exiting process.")
+        return
         
     logger.info("Main process completed successfully. Successfully exiting.")
 

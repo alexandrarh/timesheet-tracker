@@ -37,8 +37,6 @@ class SupabaseAPI:
                 
             records.append({
                 "UserId": int(row['UserId']),
-                "Email": row['Email'],
-                "Name": row['Name'],
                 "NoSubmissionDates": dates if dates else [],  
                 "NoSubmissionCount": int(row['NoSubmissionCount']) if pd.notna(row['NoSubmissionCount']) else 0,
                 "lastEmailSentDate": row['lastEmailSentDate'] if pd.notna(row['lastEmailSentDate']) else None,
