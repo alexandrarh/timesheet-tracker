@@ -19,7 +19,6 @@ class SupabaseAPI:
         """Returns the Supabase client instance."""
         return self.supabase
     
-    # Helper function -> should be used in update_dates
     def fetch_existing_submission_data(self, user_id: int) -> tuple[list, int]:
         """
         Fetches all user data from the Supabase submissions table.
