@@ -18,7 +18,7 @@ In order to run the TimeSolv Timesheet Tracker, these components are required:
 - Microsoft Graph API account (with global administrator permissions)
     - Will need `client_id`, `client_secret`, and `tenant_id`
 - Supabase account with proper databases
-    - Will need `supabase_url` and `supabase_key`
+    - Will need `supabase_url`, `supabase_key`, and `supabase_table_name`
 - GitHub repository (to run automation)
 
 ## Set up 
@@ -94,6 +94,7 @@ In order to run the TimeSolv Timesheet Tracker on a local or production environm
 - `TIMESOLV_AUTH_CODE`
 - `SUPABASE_URL`
 - `SUPABASE_KEY`
+- `SUPABASE_TABLE_NAME` (this will be your table name)
 
 For anything pertaining to TimeSolv, refer to <a href="https://help.timesolv.com/connect-to-timesolv-with-rest-api">TimeSolv's REST API Integration documentation</a> steps. <br>
 **NOTE:** For the `REDIRECT_URI` variable, using `'http://localhost:8080/callback'` is allowable.
@@ -107,7 +108,7 @@ For Supabase's API, refer to their <a href="https://supabase.com/docs/reference/
 2. Create a new project (note: free tier projects pause after 7 days of inactivity)
 3. Create the timesheet tracking table using the SQL Editor:
 ```sql
-   create table public.timesheet_tracking (
+   create table public.[your_table_name] (
      "UserId" bigint not null,
      "Email" text null,
      "Name" text null,
@@ -116,7 +117,7 @@ For Supabase's API, refer to their <a href="https://supabase.com/docs/reference/
      "lastEmailSentDate" timestamp with time zone null,
      "lastUpdateDate" timestamp with time zone null,
      "Comments" text null,
-     constraint timesheet_tracking_pkey primary key ("UserId")
+     constraint [your_table_name]_pkey primary key ("UserId")
    ) TABLESPACE pg_default;
 ```
 4. Get your credentials:
