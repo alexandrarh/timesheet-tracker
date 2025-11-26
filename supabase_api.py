@@ -8,6 +8,7 @@ import ast
 load_dotenv()
 SUPABASE_URL: str = os.getenv("SUPABASE_URL")
 SUPABASE_KEY: str = os.getenv("SUPABASE_KEY")
+SUPABASE_TABLE_NAME: str = os.getenv("SUPABASE_TABLE_NAME")
 
 class SupabaseAPI:
     """Handles Supabase client creation and connection."""
@@ -37,6 +38,8 @@ class SupabaseAPI:
                 
             records.append({
                 "UserId": int(row['UserId']),
+                "Email": row['Email'],
+                "Name": row['Name'],
                 "NoSubmissionDates": dates if dates else [],  
                 "NoSubmissionCount": int(row['NoSubmissionCount']) if pd.notna(row['NoSubmissionCount']) else 0,
                 "lastEmailSentDate": row['lastEmailSentDate'] if pd.notna(row['lastEmailSentDate']) else None,
@@ -44,5 +47,5 @@ class SupabaseAPI:
                 "Comments": row['Comments'] if pd.notna(row['Comments']) else None
             })
 
-        response = self.supabase.table("no_submission_dates_test").upsert(records, on_conflict="UserId").execute()
+        response = self.supabase.table(SUPABASE_TABLE_NAME).upsert(records, on_conflict="UserId").execute()
         return response
