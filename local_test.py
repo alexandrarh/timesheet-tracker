@@ -173,6 +173,9 @@ def main():
         timecard_tracker_df = pd.concat([timecard_tracker_df, pd.DataFrame([timecard_row])], ignore_index=True)
         timecard_listed_dates_df = pd.concat([timecard_listed_dates_df, pd.DataFrame([timecard_listed_dates_row])], ignore_index=True)
 
+        # Update lastUpdateDate to now for all users processed
+        timecard_listed_dates_df.loc[timecard_listed_dates_df['UserId'] == int(USER_ID), 'lastUpdateDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
+
     logger.info(f"Processed {len(firm_users)} users. {failed_users} failed.")
 
     # Draft up email content for users with no submissions 
@@ -214,17 +217,15 @@ def main():
         )
         if status:
             logger.info(f"Successfully sent test email to user {USER_ID} on attempt {attempt}.")
+            timecard_listed_dates_df.loc[timecard_listed_dates_df['UserId'] == int(USER_ID), 'lastEmailSentDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
             break
         if attempt < MAX_RETRIES:
             logger.warning(f"Attempt {attempt} to send test email to user {USER_ID} failed. Retrying...")
             time.sleep(2)
     if not status:
         logger.error(message)
-        timecard_listed_dates_df.loc[timecard_listed_dates_df['UserId'] == USER_ID, 'Comments'] = message      
+        timecard_listed_dates_df.loc[timecard_listed_dates_df['UserId'] == int(USER_ID), 'Comments'] = message      
         return
-
-    timecard_listed_dates_df.loc[timecard_listed_dates_df['UserId'] == USER_ID, 'lastEmailSentDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
-    timecard_listed_dates_df.loc[timecard_listed_dates_df['UserId'] == USER_ID, 'lastUpdateDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
 
     # Sending out summary email to admins
     for attempt in range(1, MAX_RETRIES + 1):
