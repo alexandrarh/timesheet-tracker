@@ -17,6 +17,8 @@ In order to run the TimeSolv Timesheet Tracker, these components are required:
     - Will need `client_id`, `client_secret`, `redirect_uri`, and `auth_code`
 - Microsoft Graph API account (with global administrator permissions)
     - Will need `client_id`, `client_secret`, and `tenant_id`
+- Supabase account with proper databases
+    - Will need `supabase_url` and `supabase_key`
 - GitHub repository (to run automation)
 
 ## Set up 
@@ -90,11 +92,37 @@ In order to run the TimeSolv Timesheet Tracker on a local or production environm
 - `TIMESOLV_CLIENT_ID`
 - `TIMESOLV_CLIENT_SECRET`
 - `TIMESOLV_AUTH_CODE`
+- `SUPABASE_URL`
+- `SUPABASE_KEY`
 
 For anything pertaining to TimeSolv, refer to <a href="https://help.timesolv.com/connect-to-timesolv-with-rest-api">TimeSolv's REST API Integration documentation</a> steps. <br>
 **NOTE:** For the `REDIRECT_URI` variable, using `'http://localhost:8080/callback'` is allowable.
 
 For Microsoft's Graph API (part of Outlook), refer to their <a href="https://learn.microsoft.com/en-us/graph/auth-register-app-v2">Authentication and Authorization</a> documentation. You can also utilize their <a href="https://developer.microsoft.com/en-us/graph/quick-start">Quick Start</a> to navigate the basics of their platform and its usage in the program.
+
+For Supabase's API, refer to their <a href="https://supabase.com/docs/reference/python/introduction">Python version</a> documentation. Furthermore, refer to the *specific* setup for the TimeSolv Timesheet Tracker below.
+
+### Supabase Setup
+1. Create a Supabase account at [supabase.com](https://supabase.com)
+2. Create a new project (note: free tier projects pause after 7 days of inactivity)
+3. Create the timesheet tracking table using the SQL Editor:
+```sql
+   create table public.timesheet_tracking (
+     "UserId" bigint not null,
+     "Email" text null,
+     "Name" text null,
+     "NoSubmissionDates" date[] null,
+     "NoSubmissionCount" bigint null,
+     "lastEmailSentDate" timestamp with time zone null,
+     "lastUpdateDate" timestamp with time zone null,
+     "Comments" text null,
+     constraint timesheet_tracking_pkey primary key ("UserId")
+   ) TABLESPACE pg_default;
+```
+4. Get your credentials:
+   - `SUPABASE_URL`: Dashboard → Project Settings → API → Project URL
+   - `SUPABASE_KEY`: Dashboard → Project Settings → API → **service_role key** (recommended for automated scripts)
+5. (Optional) Configure Row Level Security policies if using `anon` key instead of `service_role` key
 
 ### Email Configuration
 - `SENDER_EMAIL`: The time administrator's email address (emails will be sent "from" this address)
@@ -114,6 +142,86 @@ Below is a troubleshooting guide on navigating any program issues that may arise
 - Confirm your TimeSolv account has access to view firm-wide timesheet data
 - Verify the date range being queried includes workdays
 - Check that users exist in both TimeSolv and your firm's system
+
+### Supabase API Issues
+**Connection Failed**
+- Verify `SUPABASE_URL` and `SUPABASE_KEY` are correctly set
+- Ensure `SUPABASE_URL` includes the full URL (e.g., `https://your-project.supabase.co`)
+- Check that `SUPABASE_KEY` is the correct key type:
+  - Use the **service_role key** for server-side/admin access (recommended for this script)
+  - Use the **anon/public key** only if you have Row Level Security (RLS) policies configured
+- Confirm your Supabase project is active and not paused (free tier projects pause after 7 days of inactivity)
+- Find keys in: Supabase Dashboard → Project Settings → API
+
+**Authentication/Authorization Errors**
+- For automated scripts, the **service_role key** bypasses RLS and is recommended
+- If using the anon key, ensure Row Level Security (RLS) policies allow INSERT and UPDATE operations
+- Verify the key has no extra spaces or line breaks when added to secrets
+
+**Records Not Updating/Inserting**
+- **Primary Key Conflicts**: The table uses `UserId` as primary key; ensure you're using UPSERT operations to update existing users rather than insert duplicates
+- **Column Name Case Sensitivity**: Column names use PascalCase (`UserId`, `Email`, `Name`, etc.) - ensure your script matches this exactly
+- **Data Type Mismatches**:
+  - `UserId` must be a valid bigint (integer)
+  - `NoSubmissionDates` expects an array of dates in format: `['2024-01-15', '2024-01-16']`
+  - `NoSubmissionCount` must be an integer
+  - `lastEmailSentDate` and `lastUpdateDate` expect timestamp format (ISO 8601)
+- Check Supabase logs: Dashboard → Logs → Postgres Logs for specific error details
+
+**Date Array Issues**
+- `NoSubmissionDates` is a PostgreSQL array type - ensure your script formats it correctly:
+```python
+  # Correct format
+  missing_dates = ['2024-01-15', '2024-01-16', '2024-01-17']
+```
+- Dates must be in `YYYY-MM-DD` format
+- Empty arrays should be `[]` not `null`
+
+**User ID Conflicts**
+- `UserId` is the primary key and must be unique
+- Use UPSERT operations (INSERT ... ON CONFLICT UPDATE) to update existing records
+- If you get "duplicate key" errors, the user already exists - update instead of insert
+
+**Null Value Errors**
+- Only `UserId` is required (NOT NULL)
+- All other fields (`Email`, `Name`, `NoSubmissionDates`, etc.) can be null
+- If you get null constraint errors, ensure `UserId` is always provided
+
+**Timestamp Format Issues**
+- `lastEmailSentDate` and `lastUpdateDate` expect timezone-aware timestamps
+- Use ISO 8601 format: `2024-01-15T10:30:00+00:00`
+- PostgreSQL automatically handles timezone conversion
+
+**Rate Limiting**
+- Supabase free tier has API rate limits (~100 requests per second)
+- For large firms with many users, consider batching operations
+- Batch updates using Supabase's bulk insert/update features
+
+**Data Not Appearing in Dashboard**
+- Verify you're querying the correct table name
+- Clear browser cache and refresh Supabase dashboard
+- Run a test query in SQL Editor:
+```sql
+  SELECT * FROM public.no_submission_dates_test ORDER BY "lastUpdateDate" DESC LIMIT 10;
+```
+- Check if RLS policies are preventing you from viewing data in the dashboard
+
+**Network/Timeout Errors**
+- Check GitHub Actions network connectivity (rarely an issue)
+- Increase timeout values if dealing with large datasets (100+ users)
+- Verify Supabase project region for optimal latency
+
+**Debugging Tips**
+- Use Supabase Dashboard → SQL Editor to manually query and verify data structure
+- Check Supabase Dashboard → Logs → Postgres Logs for detailed error messages
+- Enable verbose logging in your script to see exact SQL operations
+- Test Supabase connection locally first using `local_test.py` before deploying to GitHub Actions
+- Verify table schema matches expectations: 
+```sql
+  SELECT column_name, data_type, is_nullable 
+  FROM information_schema.columns 
+  WHERE table_name = 'no_submission_dates_test';
+```
 
 ### Microsoft Graph API Issues
 **Rate Limit Errors (HTTP 429)**
