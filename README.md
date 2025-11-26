@@ -1,6 +1,9 @@
 # TimeSolv Timesheet Tracker
 Built with Python and GitHub Actions, this aims to validate TimeSolv firm employees' timesheets, and pick up on any users that don't submit timesheets for certain dates during the work week. This bot runs weekly to ensure everyone is evaluated accordingly.
 
+**Current Status** <br> 
+[![Timesheet Tracker Action](https://github.com/alexandrarh/timesheet-tracker/actions/workflows/actions.yaml/badge.svg)](https://github.com/alexandrarh/timesheet-tracker/actions/workflows/actions.yaml)
+
 ## How it works
 The checker runs automatically on a schedule and validates timesheet completeness:
 
