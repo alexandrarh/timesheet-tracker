@@ -19,6 +19,23 @@ class SupabaseAPI:
         """Returns the Supabase client instance."""
         return self.supabase
     
+    # Helper function -> should be used in update_dates
+    def fetch_existing_submission_data(self, user_id: int) -> tuple[list, int]:
+        """
+        Fetches all user data from the Supabase submissions table.
+
+        Args:
+        - user_id (int): The UserId to fetch data for.
+
+        Returns:
+        - List of records from the Supabase submissions table.
+        """
+        response = self.supabase.table(SUPABASE_TABLE_NAME).select("NoSubmissionDates, NoSubmissionCount").eq("UserId", user_id).execute()
+        no_submission_dates = response.data[0]['NoSubmissionDates'] if response.data else []
+        no_submission_count = response.data[0]['NoSubmissionCount'] if response.data else 0
+
+        return no_submission_dates, no_submission_count
+    
     def update_dates(self, data: pd.DataFrame):
         """
         Updates the Supabase submissions table with new data.
@@ -35,13 +52,22 @@ class SupabaseAPI:
                 dates = ast.literal_eval(dates) if dates else None
             elif not dates or (isinstance(dates, float) and pd.isna(dates)):
                 dates = None
+
+            existing_dates, existing_count = self.fetch_existing_submission_data(int(row['UserId']))
+            if existing_dates:
+                # Merge existing dates with new dates, avoiding duplicates
+                merged_dates = list(set(existing_dates) | set(dates)) if dates else existing_dates
+                dates = merged_dates
+                no_submission_count = len(merged_dates) + existing_count
+            else:
+                no_submission_count = len(dates) if dates else 0
                 
             records.append({
                 "UserId": int(row['UserId']),
                 "Email": row['Email'],
                 "Name": row['Name'],
                 "NoSubmissionDates": dates if dates else [],  
-                "NoSubmissionCount": int(row['NoSubmissionCount']) if pd.notna(row['NoSubmissionCount']) else 0,
+                "NoSubmissionCount": no_submission_count,
                 "lastEmailSentDate": row['lastEmailSentDate'] if pd.notna(row['lastEmailSentDate']) else None,
                 "lastUpdateDate": row['lastUpdateDate'] if pd.notna(row['lastUpdateDate']) else None,
                 "Comments": row['Comments'] if pd.notna(row['Comments']) else None
