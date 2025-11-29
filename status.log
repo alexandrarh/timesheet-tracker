@@ -61,3 +61,30 @@
 2025-11-22 02:22:41,594 - __main__ - INFO - Successfully sent email to user 11525 on attempt 1.
 2025-11-22 02:22:41,967 - __main__ - INFO - Successfully sent summary email to admins on attempt 1.
 2025-11-22 02:22:41,967 - __main__ - INFO - Main process completed successfully. Successfully exiting.
+2025-11-28 22:36:51,016 - __main__ - INFO - Starting main process...
+2025-11-28 22:36:51,279 - __main__ - INFO - Successfully obtained TimeSolv access token on attempt 1.
+2025-11-28 22:36:51,538 - __main__ - INFO - Successfully obtained firm users on attempt 1.
+2025-11-28 22:36:51,541 - __main__ - INFO - Fetching timecards from 2025-11-24 to 2025-11-28...
+2025-11-28 22:36:51,865 - __main__ - INFO - Successfully obtained timecards for user 95883 on attempt 1.
+2025-11-28 22:36:52,291 - __main__ - INFO - Successfully obtained timecards for user 93812 on attempt 1.
+2025-11-28 22:36:52,592 - __main__ - INFO - Successfully obtained timecards for user 92915 on attempt 1.
+2025-11-28 22:36:52,857 - __main__ - INFO - Successfully obtained timecards for user 89053 on attempt 1.
+2025-11-28 22:36:52,860 - __main__ - INFO - Excluding user 87002 from tracking as per exclusion list.
+2025-11-28 22:36:53,203 - __main__ - INFO - Successfully obtained timecards for user 57139 on attempt 1.
+2025-11-28 22:36:53,448 - __main__ - INFO - Successfully obtained timecards for user 31231 on attempt 1.
+2025-11-28 22:36:53,734 - __main__ - INFO - Successfully obtained timecards for user 30847 on attempt 1.
+2025-11-28 22:36:54,111 - __main__ - INFO - Successfully obtained timecards for user 30378 on attempt 1.
+2025-11-28 22:36:54,346 - __main__ - INFO - Successfully obtained timecards for user 11525 on attempt 1.
+2025-11-28 22:36:54,350 - __main__ - INFO - Processed 10 users. 0 failed.
+2025-11-28 22:36:55,241 - __main__ - INFO - Successfully obtained Microsoft Graph access token on attempt 1.
+2025-11-28 22:36:56,120 - __main__ - INFO - Successfully sent email to user 95883 on attempt 1.
+2025-11-28 22:36:56,624 - __main__ - INFO - Successfully sent email to user 93812 on attempt 1.
+2025-11-28 22:36:57,145 - __main__ - INFO - Successfully sent email to user 92915 on attempt 1.
+2025-11-28 22:36:57,653 - __main__ - INFO - Successfully sent email to user 89053 on attempt 1.
+2025-11-28 22:36:58,162 - __main__ - INFO - Successfully sent email to user 57139 on attempt 1.
+2025-11-28 22:36:58,660 - __main__ - INFO - Successfully sent email to user 30847 on attempt 1.
+2025-11-28 22:36:59,345 - __main__ - INFO - Successfully sent email to user 30378 on attempt 1.
+2025-11-28 22:37:00,260 - __main__ - INFO - Successfully sent email to user 11525 on attempt 1.
+2025-11-28 22:37:01,096 - __main__ - INFO - Successfully sent summary email to admins on attempt 1.
+2025-11-28 22:37:04,983 - __main__ - INFO - Supabase update response: data=[{'UserId': 95883, 'Email': 'bk@mcnulty.cpa', 'Name': 'Blythe Kirkland', 'NoSubmissionDates': ['2025-11-24', '2025-11-25', '2025-11-26', '2025-11-27', '2025-11-28'], 'NoSubmissionCount': 5, 'lastEmailSentDate': '2025-11-29T01:36:56+00:00', 'lastUpdateDate': '2025-11-29T01:36:51+00:00', 'Comments': ''}, {'UserId': 93812, 'Email': 'rt@mcnulty.cpa', 'Name': 'Rafaella Tarasova', 'NoSubmissionDates': ['2025-11-24', '2025-11-25', '2025-11-26', '2025-11-27', '2025-11-28'], 'NoSubmissionCount': 5, 'lastEmailSentDate': '2025-11-29T01:36:56+00:00', 'lastUpdateDate': '2025-11-29T01:36:52+00:00', 'Comments': ''}, {'UserId': 92915, 'Email': 'ah@mcnulty.cpa', 'Name': 'Alexandra Hernandez', 'NoSubmissionDates': ['2025-11-27', '2025-11-28', '2025-11-26'], 'NoSubmissionCount': 6, 'lastEmailSentDate': '2025-11-29T01:36:57+00:00', 'lastUpdateDate': '2025-11-29T01:36:52+00:00', 'Comments': ''}, {'UserId': 89053, 'Email': 'apa@mcnulty.cpa', 'Name': 'Alexis Peetz-Alio', 'NoSubmissionDates': ['2025-11-27', '2025-11-28'], 'NoSubmissionCount': 2, 'lastEmailSentDate': '2025-11-29T01:36:57+00:00', 'lastUpdateDate': '2025-11-29T01:36:52+00:00', 'Comments': ''}, {'UserId': 57139, 'Email': 'xm@step-inc.net', 'Name': 'Xhejni Mekshi', 'NoSubmissionDates': ['2025-11-27', '2025-11-28'], 'NoSubmissionCount': 2, 'lastEmailSentDate': '2025-11-29T01:36:58+00:00', 'lastUpdateDate': '2025-11-29T01:36:53+00:00', 'Comments': ''}, {'UserId': 31231, 'Email': 'lv@step-inc.net', 'Name': 'Lauren Vreeland', 'NoSubmissionDates': [], 'NoSubmissionCount': 0, 'lastEmailSentDate': None, 'lastUpdateDate': '2025-11-29T01:36:58+00:00', 'Comments': ''}, {'UserId': 30847, 'Email': 'ad@step-inc.net', 'Name': 'Alex Doronina', 'NoSubmissionDates': ['2025-11-26', '2025-11-27', '2025-11-28'], 'NoSubmissionCount': 3, 'lastEmailSentDate': '2025-11-29T01:36:58+00:00', 'lastUpdateDate': '2025-11-29T01:36:53+00:00', 'Comments': ''}, {'UserId': 30378, 'Email': 'hla@step-inc.net', 'Name': 'Hadas Azari', 'NoSubmissionDates': ['2025-11-24', '2025-11-25', '2025-11-26', '2025-11-27', '2025-11-28'], 'NoSubmissionCount': 5, 'lastEmailSentDate': '2025-11-29T01:36:59+00:00', 'lastUpdateDate': '2025-11-29T01:36:54+00:00', 'Comments': ''}, {'UserId': 11525, 'Email': 'JAM@MCNULTY.CPA', 'Name': 'Joseph McNulty', 'NoSubmissionDates': ['2025-11-26', '2025-11-27', '2025-11-28'], 'NoSubmissionCount': 3, 'lastEmailSentDate': '2025-11-29T01:37:00+00:00', 'lastUpdateDate': '2025-11-29T01:36:54+00:00', 'Comments': ''}] count=None
+2025-11-28 22:37:04,984 - __main__ - INFO - Main process completed successfully. Successfully exiting.
