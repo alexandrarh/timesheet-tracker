@@ -167,11 +167,13 @@ def main():
         timecard_listed_dates_row['NoSubmissionCount'] = len(timecard_missing_dates)
 
         # Append row to dataframe - convert dict to DataFrame first
+        timecard_listed_dates_row['lastUpdateDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
+        
         timecard_tracker_df = pd.concat([timecard_tracker_df, pd.DataFrame([timecard_row])], ignore_index=True)
         timecard_listed_dates_df = pd.concat([timecard_listed_dates_df, pd.DataFrame([timecard_listed_dates_row])], ignore_index=True)
 
         # Updating for last timesheet fetch
-        timecard_listed_dates_df.at[index, 'lastUpdateDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
+        # timecard_listed_dates_df.at[index, 'lastUpdateDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
 
     logger.info(f"Processed {len(firm_users)} users. {failed_users} failed.")
 
