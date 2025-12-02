@@ -249,8 +249,14 @@ def main():
         try:
             supabase_api = SupabaseAPI()
             update_response = supabase_api.update_dates(data=timecard_listed_dates_df)
-            logger.info(f"Supabase update response: {update_response}")
-            break
+
+            if update_response.data is not None:
+                logger.info(f"Supabase update successful on attempt {attempt}. Updated {len(update_response.data)} records.")
+                break
+            else:
+                logger.warning(f"Supabase returned None data on attempt {attempt}")
+                if attempt < MAX_RETRIES:
+                    time.sleep(2)
         except Exception as e:
             logger.error(f"Error updating Supabase on attempt {attempt}: {e}")
             if attempt < MAX_RETRIES:
