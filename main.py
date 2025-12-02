@@ -117,6 +117,18 @@ def main():
     timecard_tracker_df = pd.DataFrame(columns=column_list)
     timecard_listed_dates_df = pd.DataFrame(columns=listed_dates_columns)
 
+    # Initialize Supabase API to fetch existing data
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            supabase_api = SupabaseAPI()
+            break
+        except Exception as e:
+            logger.warning(f"Attempt {attempt} to initialize Supabase API failed: {e}")
+            time.sleep(2)
+    if 'supabase_api' not in locals():
+        logger.error("Exceeded maximum retries to initialize Supabase API. Now exiting process.")
+        return
+
     # Iterate through firm users and populate dataframe
     failed_users = 0            # Tracking how many users failed to get timecards retrieved
     for user in firm_users:
@@ -166,14 +178,11 @@ def main():
         timecard_listed_dates_row['NoSubmissionDates'] = timecard_missing_dates
         timecard_listed_dates_row['NoSubmissionCount'] = len(timecard_missing_dates)
 
-        # Append row to dataframe - convert dict to DataFrame first
+        # Append row to dataframe; update for timesheet fetch from TimeSolv
         timecard_listed_dates_row['lastUpdateDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
-        
+
         timecard_tracker_df = pd.concat([timecard_tracker_df, pd.DataFrame([timecard_row])], ignore_index=True)
         timecard_listed_dates_df = pd.concat([timecard_listed_dates_df, pd.DataFrame([timecard_listed_dates_row])], ignore_index=True)
-
-        # Updating for last timesheet fetch
-        # timecard_listed_dates_df.at[index, 'lastUpdateDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
 
     logger.info(f"Processed {len(firm_users)} users. {failed_users} failed.")
 
@@ -249,7 +258,6 @@ def main():
 
     # Update Supabase with latest info
     for attempt in range(1, MAX_RETRIES + 1):
-        supabase_api = SupabaseAPI()
         try:
             update_response = supabase_api.update_dates(data=timecard_listed_dates_df)
             logger.info(f"Supabase update response: {update_response}")
