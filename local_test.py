@@ -254,7 +254,8 @@ def main():
         update_response = supabase_api.update_dates(
             data=timecard_listed_dates_df[timecard_listed_dates_df['UserId'] == int(USER_ID)]
         )
-        logger.info(f"Supabase update response for user {USER_ID}: {update_response}")
+        if update_response.data is not None:
+            logger.info(f"Supabase update response for user {USER_ID}: successfully updated {len(update_response.data)} records.")
     except Exception as e:
         logger.error(f"Error updating Supabase for user {USER_ID}: {e}")
     
