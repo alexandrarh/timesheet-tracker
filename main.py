@@ -118,7 +118,8 @@ def main():
     timecard_listed_dates_df = pd.DataFrame(columns=listed_dates_columns)
 
     # Iterate through firm users and populate dataframe
-    failed_users = 0            # Tracking how many users failed to get timecards retrieved
+    # Tracking how many users failed to get timecards retrieved
+    failed_users = 0            
     for user in firm_users:
         if user['Id'] in exclude_user_ids:
             logger.info(f"Excluding user {user['Id']} from tracking as per exclusion list.")
@@ -267,8 +268,6 @@ def main():
         return
         
     logger.info("Main process completed successfully. Successfully exiting.")
-
-    # NOTE: Will need to add to database in future for tracking purposes
 
 if __name__ == "__main__":
     main()
