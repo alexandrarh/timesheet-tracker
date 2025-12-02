@@ -117,18 +117,6 @@ def main():
     timecard_tracker_df = pd.DataFrame(columns=column_list)
     timecard_listed_dates_df = pd.DataFrame(columns=listed_dates_columns)
 
-    # Initialize Supabase API to fetch existing data
-    for attempt in range(1, MAX_RETRIES + 1):
-        try:
-            supabase_api = SupabaseAPI()
-            break
-        except Exception as e:
-            logger.warning(f"Attempt {attempt} to initialize Supabase API failed: {e}")
-            time.sleep(2)
-    if 'supabase_api' not in locals():
-        logger.error("Exceeded maximum retries to initialize Supabase API. Now exiting process.")
-        return
-
     # Iterate through firm users and populate dataframe
     failed_users = 0            # Tracking how many users failed to get timecards retrieved
     for user in firm_users:
@@ -259,6 +247,7 @@ def main():
     # Update Supabase with latest info
     for attempt in range(1, MAX_RETRIES + 1):
         try:
+            supabase_api = SupabaseAPI()
             update_response = supabase_api.update_dates(data=timecard_listed_dates_df)
             logger.info(f"Supabase update response: {update_response}")
             break

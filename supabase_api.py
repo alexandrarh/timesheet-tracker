@@ -57,9 +57,9 @@ class SupabaseAPI:
                 # Merge existing dates with new dates, avoiding duplicates
                 merged_dates = list(set(existing_dates) | set(dates)) if dates else existing_dates
                 dates = merged_dates
-                no_submission_count = len(merged_dates) + existing_count
+                no_submission_count = len(merged_dates)
             else:
-                no_submission_count = len(dates) if dates else 0
+                no_submission_count = len(dates)
                 
             records.append({
                 "UserId": int(row['UserId']),
