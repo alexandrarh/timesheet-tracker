@@ -37,6 +37,11 @@ jobs:
           MICROSOFT_TENANT_ID: ${{ secrets.MICROSOFT_TENANT_ID }}
           SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
           ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
+
+          # Supabase 
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_TABLE_NAME: ${{ secrets.SUPABASE_TABLE_NAME }}
         run: python main.py
           
       - name: commit files
