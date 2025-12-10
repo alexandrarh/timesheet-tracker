@@ -34,6 +34,44 @@ class SupabaseAPI:
         no_submission_count = response.data[0]['NoSubmissionCount'] if response.data else 0
 
         return no_submission_dates, no_submission_count
+
+    def remove_dates(self, data: pd.DataFrame):
+        """
+        Removes specified dates from the Supabase submissions table.
+
+        Args:
+        - data (pd.DataFrame): DataFrame containing the data to be updated in the Supabase submissions table.
+        """
+        records = []
+
+        for _, row in data.iterrows():
+            # Handle NoSubmissionDates
+            dates = row['NoSubmissionDates']
+            if isinstance(dates, str):
+                dates = ast.literal_eval(dates) if dates else None
+            elif not dates or (isinstance(dates, float) and pd.isna(dates)):
+                dates = None
+            
+            # TODO: Check if this logic is correct for removal
+            existing_dates, existing_count = self.fetch_existing_submission_data(int(row['UserId']))
+            if existing_dates:
+                # Remove specified dates from existing dates
+                updated_dates = [date for date in existing_dates if date not in dates] if dates else existing_dates
+                dates = updated_dates
+                no_submission_count = len(updated_dates)
+            else:
+                no_submission_count = 0
+                
+            records.append({
+                "UserId": int(row['UserId'])
+                "NoSubmissionDates": dates if dates else [],  
+                "NoSubmissionCount": no_submission_count,
+                "lastUpdateDate": row['lastUpdateDate'] if pd.notna(row['lastUpdateDate']) else None,
+                "Comments": row['Comments'] if pd.notna(row['Comments']) else None
+            })
+
+        response = self.supabase.table(SUPABASE_TABLE_NAME).upsert(records, on_conflict="UserId").execute()
+        return response
     
     def update_dates(self, data: pd.DataFrame):
         """
