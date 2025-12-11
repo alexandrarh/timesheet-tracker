@@ -180,7 +180,29 @@ def main():
     logger.info(f"Processed {len(firm_users)} users. {failed_users} failed.")
 
     # Get Supabase data to update dates
-    supabase = SupabaseAPI()
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            supabase = SupabaseAPI()
+            logger.info(f"Successfully initialized Supabase client on attempt {attempt}.")
+            response = supabase.remove_dates(timecard_listed_dates_df)
+
+            if response.data is not None:
+                logger.info(f"Supabase update successful on attempt {attempt}. Updated {len(response.data)} records.")
+                break
+            else:
+                logger.warning(f"Supabase returned None data on attempt {attempt}")
+                
+                if attempt < MAX_RETRIES:
+                    time.sleep(2)
+        except Exception as e:
+            logger.error(f"Error updating Supabase on attempt {attempt}: {e}")
+            
+            if attempt < MAX_RETRIES:
+                logger.warning(f"Retrying Supabase update...")
+                time.sleep(2)
+    else:
+        logger.error("Exceeded maximum retries for Supabase update. Now exiting process.")
+        return
 
 if __name__ == "__main__":
     previous_work_week_dates = get_previous_work_week_dates()
