@@ -52,7 +52,6 @@ class SupabaseAPI:
             elif not dates or (isinstance(dates, float) and pd.isna(dates)):
                 dates = None
             
-            # TODO: Check if this logic is correct for removal
             existing_dates, existing_count = self.fetch_existing_submission_data(int(row['UserId']))
             if existing_dates:
                 # Remove specified dates from existing dates
@@ -60,7 +59,7 @@ class SupabaseAPI:
                 dates = updated_dates
                 no_submission_count = len(updated_dates)
             else:
-                no_submission_count = 0
+                no_submission_count = existing_count
                 
             records.append({
                 "UserId": int(row['UserId'])
