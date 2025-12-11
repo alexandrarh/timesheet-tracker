@@ -24,6 +24,12 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 logger_file_handler.setFormatter(formatter)
 logger.addHandler(logger_file_handler)
 
+# List of user IDs to exclude from email notifications -> see if could implement this dynamically later
+exclude_user_ids = [87002]
+
+# Retry number for attempted API calls and such
+MAX_RETRIES = 3
+
 # This file will be dedicated to refreshing data in Supabase from TimeSolv
 # Will check if any users have not submitted timesheets for the past week -> if so, remove dates from Supabase, and update count
 # Will also run as a separate automation independent of the original timesheet_tracker.py script -> will run weekly on Saturday or Sunday (start of week or end of week)
@@ -106,8 +112,77 @@ def main():
         return
 
     # Get dates for range (previous work week)
-    previous_work_week = get_previous_work_week_dates()
-    logger.info(f"Fetching timecards from {previous_work_week[0]} to {previous_work_week[-1]}...")
+    previous_work_week_dates = get_previous_work_week_dates()
+    logger.info(f"Fetching timecards from {previous_work_week_dates[0]} to {previous_work_week_dates[-1]}...")
+
+    # Create dataframe that contains user ID and dates with submission of timecard for each day
+    column_list = ['UserId'] + previous_work_week_dates
+    listed_dates_columns = ['UserId', 'NoSubmissionDates', 'NoSubmissionCount', 'lastUpdateDate' , 'Comments']
+
+    timecard_tracker_df = pd.DataFrame(columns=column_list)
+    timecard_listed_dates_df = pd.DataFrame(columns=listed_dates_columns)
+
+    # Iterate through firm users and populate dataframe
+    failed_users = 0            
+    for user in firm_users:
+        if user['Id'] in exclude_user_ids:
+            logger.info(f"Excluding user {user['Id']} from tracking as per exclusion list.")
+            continue
+
+        timecard_row = {'UserId': user['Id']}
+        timecard_listed_dates_row = {'UserId': user['Id'], 'Comments': ""}
+        timecard_missing_dates = []
+
+        for attempt in range(1, MAX_RETRIES + 1):
+            timecards = timesolv_api.search_timecards(
+                start_date=previous_work_week_dates[0],
+                end_date=previous_work_week_dates[-1],
+                firm_user_id=user['Id']
+            )
+
+            if isinstance(timecards, List) and (len(timecards) == 0 or isinstance(timecards[0], Dict)):
+                logger.info(f"Successfully obtained previous week's timecards for user {user['Id']} on attempt {attempt}.")
+                break
+
+            if attempt < MAX_RETRIES:
+                logger.warning(f"Attempt {attempt} to get previous week's timecards for user {user['Id']} failed. Retrying...")
+                time.sleep(2)
+
+        if isinstance(timecards, str):
+            logger.error(f"Error fetching previous week's timecards for user {user['Id']}: {timecards}")
+            timecard_listed_dates_row['NoSubmissionDates'] = []
+            timecard_listed_dates_row['NoSubmissionCount'] = 0
+            timecard_listed_dates_row['Comments'] = f"Error fetching previous week's timecards: {timecards}"
+            timecard_listed_dates_df = pd.concat([timecard_listed_dates_df, pd.DataFrame([timecard_listed_dates_row])], ignore_index=True)
+            continue
+
+        # Initialize all dates to 0 (no submission)
+        for date_str in previous_work_week_dates:
+            timecard_row[date_str] = 0
+
+        # Mark dates with submissions as 1
+        if not isinstance(timecards, str):
+            for tc in timecards:
+                tc_date = tc.get('Date')
+                if tc_date in timecard_row:
+                    timecard_row[tc_date] = 1
+
+        timecard_missing_dates = [date_str for date_str in previous_work_week_dates if timecard_row[date_str] == 0]
+        timecard_listed_dates_row['NoSubmissionDates'] = timecard_missing_dates
+        timecard_listed_dates_row['NoSubmissionCount'] = len(timecard_missing_dates)
+
+        # Append row to dataframe; update for timesheet fetch from TimeSolv
+        timecard_listed_dates_row['lastUpdateDate'] = datetime.now(ZoneInfo('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
+
+        timecard_tracker_df = pd.concat([timecard_tracker_df, pd.DataFrame([timecard_row])], ignore_index=True)
+        timecard_listed_dates_df = pd.concat([timecard_listed_dates_df, pd.DataFrame([timecard_listed_dates_row])], ignore_index=True)
+
+    logger.info(f"Processed {len(firm_users)} users. {failed_users} failed.")
+
+    # Get Supabase data to update dates
+    supabase = SupabaseAPI()
 
 if __name__ == "__main__":
-    main()
+    previous_work_week_dates = get_previous_work_week_dates()
+    print("Previous work week dates:", previous_work_week_dates)
+    # main()
