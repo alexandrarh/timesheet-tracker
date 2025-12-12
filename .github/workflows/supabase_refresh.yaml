@@ -1,0 +1,51 @@
+name: Supabase Refresh workflow
+
+on:
+  schedule:
+    - cron: '0 1 * * 7'  # 1 AM UTC Sunday = 8 PM EST Saturday
+  workflow_dispatch:
+
+jobs:
+  check-timesheets:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repo content
+        uses: actions/checkout@v4 # checkout the repository content to github runner
+
+      - name: setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13' # install the python version needed
+          
+      - name: install python packages
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: execute supabase_refresh 
+        env:
+          # For TimeSolv API
+          TIMESOLV_CLIENT_ID: ${{ secrets.TIMESOLV_CLIENT_ID }}
+          TIMESOLV_CLIENT_SECRET: ${{ secrets.TIMESOLV_CLIENT_SECRET }}
+          TIMESOLV_AUTH_CODE: ${{ secrets.TIMESOLV_AUTH_CODE }}
+          REDIRECT_URI: ${{ secrets.REDIRECT_URI }}
+
+          # Supabase 
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_TABLE_NAME: ${{ secrets.SUPABASE_TABLE_NAME }}
+        run: python supabase_refresh.py
+          
+      - name: commit files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git diff-index --quiet HEAD || (git commit -a -m "updated logs" --allow-empty)
+          
+      - name: push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main 
