@@ -2,7 +2,7 @@ name: Supabase Refresh workflow
 
 on:
   schedule:
-    - cron: '0 1 ? * 7'  # 1 AM UTC Sunday = 8 PM EST Saturday
+    - cron: '0 1 * * 0'  # 1 AM UTC Sunday = 8 PM EST Saturday
   workflow_dispatch:
 
 jobs:
