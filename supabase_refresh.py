@@ -53,8 +53,7 @@ def get_work_week_dates():
     
     return [day.strftime('%Y-%m-%d') for day in work_week]
 
-# TODO: Check if type is correct
-def get_previous_work_week_dates() -> List[str]:
+def get_previous_work_week_dates():
     """
     Get the start (Monday) and end (Friday) dates of the previous work week.
 
@@ -204,7 +203,7 @@ def main():
         logger.error("Exceeded maximum retries for Supabase update. Now exiting process.")
         return
 
+    logging.info("Supabase refresh process completed successfully. Exiting process.")
+
 if __name__ == "__main__":
-    previous_work_week_dates = get_previous_work_week_dates()
-    print("Previous work week dates:", previous_work_week_dates)
-    # main()
+    main()
