@@ -62,7 +62,7 @@ class SupabaseAPI:
                 no_submission_count = existing_count
                 
             records.append({
-                "UserId": int(row['UserId'])
+                "UserId": int(row['UserId']),
                 "NoSubmissionDates": dates if dates else [],  
                 "NoSubmissionCount": no_submission_count,
                 "lastUpdateDate": row['lastUpdateDate'] if pd.notna(row['lastUpdateDate']) else None,
