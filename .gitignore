@@ -221,3 +221,4 @@ supabase_test.py
 
 # Excluded files
 !status.log
+!supabase_refresh_status.log

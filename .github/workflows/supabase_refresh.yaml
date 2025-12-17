@@ -37,12 +37,13 @@ jobs:
           SUPABASE_TABLE_NAME: ${{ secrets.SUPABASE_TABLE_NAME }}
         run: python supabase_refresh.py
           
-      - name: commit files
+      - name: commit files on error
+        if: failure()
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add -A
-          git diff-index --quiet HEAD || (git commit -a -m "updated logs" --allow-empty)
+          git add supabase_refresh_status.log
+          git diff-index --quiet HEAD || git commit -m "Log from failed run"
           
       - name: push changes
         uses: ad-m/github-push-action@v0.6.0
