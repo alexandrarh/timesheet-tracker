@@ -144,3 +144,26 @@
 2025-12-14 01:08:20,416 - __main__ - INFO - Successfully sent summary email to admins on attempt 1.
 2025-12-14 01:08:22,795 - __main__ - INFO - Supabase update successful on attempt 1. Updated 9 records.
 2025-12-14 01:08:22,795 - __main__ - INFO - Main process completed successfully. Successfully exiting.
+2025-12-20 02:29:43,544 - __main__ - INFO - Starting main process...
+2025-12-20 02:29:43,842 - __main__ - INFO - Successfully obtained TimeSolv access token on attempt 1.
+2025-12-20 02:29:44,096 - __main__ - INFO - Successfully obtained firm users on attempt 1.
+2025-12-20 02:29:44,097 - __main__ - INFO - Fetching timecards from 2025-12-15 to 2025-12-19...
+2025-12-20 02:29:44,323 - __main__ - INFO - Successfully obtained timecards for user 95883 on attempt 1.
+2025-12-20 02:29:44,554 - __main__ - INFO - Successfully obtained timecards for user 92915 on attempt 1.
+2025-12-20 02:29:44,766 - __main__ - INFO - Successfully obtained timecards for user 89053 on attempt 1.
+2025-12-20 02:29:44,768 - __main__ - INFO - Excluding user 87002 from tracking as per exclusion list.
+2025-12-20 02:29:44,981 - __main__ - INFO - Successfully obtained timecards for user 57139 on attempt 1.
+2025-12-20 02:29:45,199 - __main__ - INFO - Successfully obtained timecards for user 31231 on attempt 1.
+2025-12-20 02:29:45,411 - __main__ - INFO - Successfully obtained timecards for user 30847 on attempt 1.
+2025-12-20 02:29:45,623 - __main__ - INFO - Successfully obtained timecards for user 30378 on attempt 1.
+2025-12-20 02:29:45,851 - __main__ - INFO - Successfully obtained timecards for user 11525 on attempt 1.
+2025-12-20 02:29:45,852 - __main__ - INFO - Processed 9 users. 0 failed.
+2025-12-20 02:29:46,175 - __main__ - INFO - Successfully obtained Microsoft Graph access token on attempt 1.
+2025-12-20 02:29:46,745 - __main__ - INFO - Successfully sent email to user 95883 on attempt 1.
+2025-12-20 02:29:46,908 - __main__ - INFO - Successfully sent email to user 57139 on attempt 1.
+2025-12-20 02:29:47,132 - __main__ - INFO - Successfully sent email to user 31231 on attempt 1.
+2025-12-20 02:29:47,328 - __main__ - INFO - Successfully sent email to user 30378 on attempt 1.
+2025-12-20 02:29:47,562 - __main__ - INFO - Successfully sent email to user 11525 on attempt 1.
+2025-12-20 02:29:47,783 - __main__ - INFO - Successfully sent summary email to admins on attempt 1.
+2025-12-20 02:29:50,050 - __main__ - INFO - Supabase update successful on attempt 1. Updated 8 records.
+2025-12-20 02:29:50,050 - __main__ - INFO - Main process completed successfully. Successfully exiting.
