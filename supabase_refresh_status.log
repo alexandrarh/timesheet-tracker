@@ -1,0 +1,17 @@
+2026-01-06 07:29:45,716 - __main__ - INFO - Starting Supabase refresh process.
+2026-01-06 07:29:46,045 - __main__ - INFO - Successfully obtained TimeSolv access token on attempt 1.
+2026-01-06 07:29:46,425 - __main__ - INFO - Successfully obtained firm users on attempt 1.
+2026-01-06 07:29:46,425 - __main__ - INFO - Fetching timecards from 2025-12-29 to 2026-01-02...
+2026-01-06 07:29:46,774 - __main__ - INFO - Successfully obtained previous week's timecards for user 97461 on attempt 1.
+2026-01-06 07:29:47,026 - __main__ - INFO - Successfully obtained previous week's timecards for user 95883 on attempt 1.
+2026-01-06 07:29:47,267 - __main__ - INFO - Successfully obtained previous week's timecards for user 92915 on attempt 1.
+2026-01-06 07:29:47,516 - __main__ - INFO - Successfully obtained previous week's timecards for user 89053 on attempt 1.
+2026-01-06 07:29:47,519 - __main__ - INFO - Excluding user 87002 from tracking as per exclusion list.
+2026-01-06 07:29:47,756 - __main__ - INFO - Successfully obtained previous week's timecards for user 57139 on attempt 1.
+2026-01-06 07:29:48,065 - __main__ - INFO - Successfully obtained previous week's timecards for user 31231 on attempt 1.
+2026-01-06 07:29:48,375 - __main__ - INFO - Successfully obtained previous week's timecards for user 30847 on attempt 1.
+2026-01-06 07:29:48,671 - __main__ - INFO - Successfully obtained previous week's timecards for user 30378 on attempt 1.
+2026-01-06 07:29:50,498 - __main__ - INFO - Successfully obtained previous week's timecards for user 11525 on attempt 1.
+2026-01-06 07:29:50,499 - __main__ - INFO - Processed 10 users. 0 failed.
+2026-01-06 07:29:50,557 - __main__ - INFO - Successfully initialized Supabase client on attempt 1.
+2026-01-06 07:29:53,211 - __main__ - INFO - Supabase update successful on attempt 1. Updated 9 records.
