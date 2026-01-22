@@ -218,6 +218,7 @@ logger_dev.py
 notes.md
 api_parts_test.py
 supabase_test.py
+firm_users.csv
 
 # Excluded files
 !status.log
