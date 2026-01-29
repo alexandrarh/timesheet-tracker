@@ -219,6 +219,7 @@ notes.md
 api_parts_test.py
 supabase_test.py
 firm_users.csv
+artifacts/*
 
 # Excluded files
 !status.log
