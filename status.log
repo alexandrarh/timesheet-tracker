@@ -308,3 +308,35 @@
 2026-01-24 02:51:23,528 - __main__ - INFO - Successfully sent summary email to admins on attempt 1.
 2026-01-24 02:51:25,951 - __main__ - INFO - Supabase update successful on attempt 1. Updated 10 records.
 2026-01-24 02:51:25,951 - __main__ - INFO - Main process completed successfully. Successfully exiting.
+2026-01-31 03:15:07,428 - __main__ - INFO - Starting main process...
+2026-01-31 03:15:07,658 - __main__ - INFO - Successfully obtained TimeSolv access token on attempt 1.
+2026-01-31 03:15:07,900 - __main__ - INFO - Successfully obtained firm users on attempt 1.
+2026-01-31 03:15:07,906 - __main__ - INFO - Fetching timecards from 2026-01-26 to 2026-01-30...
+2026-01-31 03:15:08,121 - __main__ - INFO - Successfully obtained timecards for user 97461 on attempt 1.
+2026-01-31 03:15:08,641 - __main__ - INFO - Successfully obtained timecards for user 95883 on attempt 1.
+2026-01-31 03:15:08,845 - __main__ - INFO - Successfully obtained timecards for user 93812 on attempt 1.
+2026-01-31 03:15:09,069 - __main__ - INFO - Successfully obtained timecards for user 92915 on attempt 1.
+2026-01-31 03:15:09,300 - __main__ - INFO - Successfully obtained timecards for user 89053 on attempt 1.
+2026-01-31 03:15:09,301 - __main__ - INFO - Excluding user 87002 from tracking as per exclusion list.
+2026-01-31 03:15:09,516 - __main__ - INFO - Successfully obtained timecards for user 57139 on attempt 1.
+2026-01-31 03:15:09,776 - __main__ - INFO - Successfully obtained timecards for user 31231 on attempt 1.
+2026-01-31 03:15:10,015 - __main__ - INFO - Successfully obtained timecards for user 30847 on attempt 1.
+2026-01-31 03:15:10,264 - __main__ - INFO - Successfully obtained timecards for user 30378 on attempt 1.
+2026-01-31 03:15:10,493 - __main__ - INFO - Successfully obtained timecards for user 11525 on attempt 1.
+2026-01-31 03:15:10,494 - __main__ - INFO - Processed 11 users. 0 failed.
+2026-01-31 03:15:10,867 - __main__ - INFO - Successfully obtained Microsoft Graph access token on attempt 1.
+2026-01-31 03:15:11,418 - __main__ - INFO - Successfully sent email to user 97461 on attempt 1.
+2026-01-31 03:15:11,747 - __main__ - INFO - Successfully sent email to user 95883 on attempt 1.
+2026-01-31 03:15:12,397 - __main__ - INFO - Successfully sent email to user 93812 on attempt 1.
+2026-01-31 03:15:12,691 - __main__ - INFO - Successfully sent email to user 57139 on attempt 1.
+2026-01-31 03:15:13,021 - __main__ - INFO - Successfully sent email to user 31231 on attempt 1.
+2026-01-31 03:15:13,320 - __main__ - INFO - Successfully sent email to user 30847 on attempt 1.
+2026-01-31 03:15:13,590 - __main__ - INFO - Successfully sent email to user 30378 on attempt 1.
+2026-01-31 03:15:13,863 - __main__ - INFO - Successfully sent email to user 11525 on attempt 1.
+2026-01-31 03:15:14,191 - __main__ - INFO - Successfully sent summary email to admins on attempt 1.
+2026-01-31 03:15:14,333 - __main__ - ERROR - Error updating Supabase on attempt 1: [Errno -2] Name or service not known
+2026-01-31 03:15:14,334 - __main__ - WARNING - Retrying Supabase update...
+2026-01-31 03:15:16,423 - __main__ - ERROR - Error updating Supabase on attempt 2: [Errno -2] Name or service not known
+2026-01-31 03:15:16,423 - __main__ - WARNING - Retrying Supabase update...
+2026-01-31 03:15:18,510 - __main__ - ERROR - Error updating Supabase on attempt 3: [Errno -2] Name or service not known
+2026-01-31 03:15:18,510 - __main__ - ERROR - Exceeded maximum retries for Supabase update. Now exiting process.
