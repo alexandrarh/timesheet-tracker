@@ -57,7 +57,42 @@ def prompt_for_date_range():
 
     print(f"Date range is valid: {start_date} to {end_date}")
     work_week_dates = get_work_week_date_range(start_date, end_date)
-    print(f"Work week dates: {work_week_dates}")
+    return work_week_dates
+
+def main_process(work_week_dates: List[str]):
+    # Initialize TimeSolv API client
+    auth = TimeSolveAuth()
+    for attempt in range(1, MAX_RETRIES + 1):
+        status, access_token = auth.get_access_token()
+
+        # Breaking with successful access token retrieval
+        if status:
+            print(f"Successfully obtained TimeSolv access token on attempt {attempt}.")
+            break
+
+        if attempt < MAX_RETRIES:
+            print(f"Attempt {attempt} to get TimeSolv access token failed. Retrying...")
+            time.sleep(2)  
+    if not status:
+        print(f"{access_token}. Exceeded maximum retries. Now exiting process.")
+        return
+    
+    # Initialize TimeSolv API and fetch firm users with retry logic
+    timesolv_api = TimeSolvAPI(access_token=access_token)
+    for attempt in range(1, MAX_RETRIES + 1):
+        firm_users = timesolv_api.get_all_firm_users()
+
+        # Breaking with successful firm users retrieval
+        if isinstance(firm_users, List) and isinstance(firm_users[0], Dict):
+            print(f"Successfully obtained firm users on attempt {attempt}.")
+            break
+
+        if attempt < MAX_RETRIES:
+            print(f"Attempt {attempt} to get firm users failed. Retrying...")
+            time.sleep(2)  
+    if isinstance(firm_users, str):
+        print(f"{firm_users}. Exceeded maximum retries. Now exiting process.")
+        return
 
 def main():
     while True:
@@ -66,7 +101,8 @@ def main():
         starting_input = input("Enter command: ").strip().lower()
 
         if starting_input == "start":
-            prompt_for_date_range()
+            work_week_dates = prompt_for_date_range()
+            main_process(work_week_dates)
             break
         elif starting_input == "help":
             print("Instructions for using the timecard retrieval tool:")
