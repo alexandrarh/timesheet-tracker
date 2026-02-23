@@ -1,8 +1,5 @@
 from timesolv_api import TimeSolvAPI, TimeSolveAuth
-import logging
-import logging.handlers
 from datetime import date, timedelta, datetime
-from zoneinfo import ZoneInfo
 from typing import List, Dict
 import time
 import os
@@ -13,6 +10,9 @@ exclude_user_ids = [87002]
 
 # Retry number for attempted API calls and such
 MAX_RETRIES = 3
+
+# Spreadsheet file name for output
+OUTPUT_FILE = "timesolv_timecards.xlsx"
 
 def get_work_week_date_range(start_date: str, end_date: str) -> List[str] | None:
     """Get all working days (Monday–Friday) within the given date range
@@ -57,9 +57,9 @@ def prompt_for_date_range():
 
     print(f"Date range is valid: {start_date} to {end_date}")
     work_week_dates = get_work_week_date_range(start_date, end_date)
-    return work_week_dates
+    return start_date, end_date, work_week_dates
 
-def main_process(work_week_dates: List[str]):
+def main_process(start_date: str, end_date: str, work_week_dates: List[str]):
     # Initialize TimeSolv API client
     auth = TimeSolveAuth()
     for attempt in range(1, MAX_RETRIES + 1):
@@ -93,6 +93,58 @@ def main_process(work_week_dates: List[str]):
     if isinstance(firm_users, str):
         print(f"{firm_users}. Exceeded maximum retries. Now exiting process.")
         return
+    
+    # Loop to create new dataframe for each user, and then append it to xlsx spreadsheet
+    failed_users = []
+    for user in firm_users:
+        if user['Id'] in exclude_user_ids:
+            print(f"Excluding user {user['Id']} from tracking as per exclusion list.")
+            continue
+
+        employee_df = pd.DataFrame(columns=['Date', 'Duration', 'BilledAmount', 'BillableStatus', 'Notes', 
+                                            'ProjectId'])
+
+        for attempt in range(1, MAX_RETRIES + 1):
+            timecards = timesolv_api.search_timecards(
+                start_date=start_date,
+                end_date=end_date,
+                firm_user_id=user['Id']
+            )
+
+            if isinstance(timecards, List) and (len(timecards) == 0 or isinstance(timecards[0], Dict)):
+                print(f"Successfully obtained timecards for user {user['Id']} on attempt {attempt}.")
+                break
+
+            if attempt < MAX_RETRIES:
+                print(f"Attempt {attempt} to get timecards for user {user['Id']} failed. Retrying...")
+                time.sleep(2)
+        if isinstance(timecards, str):
+            print(f"Error fetching timecards for user {user['Id']}: {timecards}")
+            failed_users.append(user['Id'])
+            continue
+        
+        # Loop to append timecard data to dataframe for each user, and then save to xlsx spreadsheet
+        for timecard in timecards:
+            timecard_date = timecard.get('Date')
+            duration = timecard.get('Duration', 0)
+            billed_amount = timecard.get('BilledAmount', 0)
+            billable_status = timecard.get('BillableStatus', 'Unknown')
+            notes = timecard.get('Notes', '')
+            project_id = timecard.get('ProjectId', '')
+            
+            if timecard_date in work_week_dates:
+                employee_df = employee_df.append({
+                    'Date': timecard_date,
+                    'Duration': duration,
+                    'BilledAmount': billed_amount,
+                    'BillableStatus': billable_status,
+                    'Notes': notes,
+                    'ProjectId': project_id
+                }, ignore_index=True)
+
+        # Save the dataframe to an Excel file, creating a new sheet for each user
+        with pd.ExcelWriter(OUTPUT_FILE, mode='a', if_sheet_exists='replace') as writer:
+            employee_df.to_excel(writer, sheet_name=f"User_{user['Id']}", index=False)
 
 def main():
     while True:
@@ -101,8 +153,8 @@ def main():
         starting_input = input("Enter command: ").strip().lower()
 
         if starting_input == "start":
-            work_week_dates = prompt_for_date_range()
-            main_process(work_week_dates)
+            start_date, end_date, work_week_dates = prompt_for_date_range()
+            main_process(start_date, end_date, work_week_dates)
             break
         elif starting_input == "help":
             print("Instructions for using the timecard retrieval tool:")
