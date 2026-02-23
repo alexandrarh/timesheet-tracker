@@ -14,20 +14,27 @@ exclude_user_ids = [87002]
 # Retry number for attempted API calls and such
 MAX_RETRIES = 3
 
-def get_work_week_date_range(start_date, end_date) -> List[str] | None:
-    """Get the start (Monday) and end (Friday) dates of the current work week.
+def get_work_week_date_range(start_date: str, end_date: str) -> List[str] | None:
+    """Get all working days (Monday–Friday) within the given date range
+
+    Args:
+        start_date: Start date string in 'YYYY-MM-DD' format.
+        end_date: End date string in 'YYYY-MM-DD' format.
 
     Returns:
-    - List of dates as strings in 'YYYY-MM-DD' format.
+        List of working day dates as strings in 'YYYY-MM-DD' format, or None if invalid.
     """
-    # Use Eastern time to get the correct "today" regardless of UTC time
-    today = datetime.now(ZoneInfo('America/New_York')).date()
-    monday = today - timedelta(days=today.weekday())
-    
-    # Generate all 5 work days
-    work_week = [monday + timedelta(days=i) for i in range(5)]
-    
-    return [day.strftime('%Y-%m-%d') for day in work_week]
+    start = datetime.strptime(start_date, '%Y-%m-%d').date()
+    end = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+    # Collect all weekdays (Mon–Fri) between start and end inclusive
+    work_days = [
+        start + timedelta(days=i)
+        for i in range((end - start).days + 1)
+        if (start + timedelta(days=i)).weekday() < 5  # 0=Mon, 4=Fri
+    ]
+
+    return [day.strftime('%Y-%m-%d') for day in work_days] if work_days else None
 
 def prompt_for_date_range():
     while True:
@@ -49,7 +56,8 @@ def prompt_for_date_range():
             break
 
     print(f"Date range is valid: {start_date} to {end_date}")
-
+    work_week_dates = get_work_week_date_range(start_date, end_date)
+    print(f"Work week dates: {work_week_dates}")
 
 def main():
     while True:
