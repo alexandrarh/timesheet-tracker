@@ -220,6 +220,7 @@ api_parts_test.py
 supabase_test.py
 firm_users.csv
 artifacts/*
+timesolv_timecards*
 
 # Excluded files
 !status.log
