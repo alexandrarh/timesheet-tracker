@@ -6,7 +6,7 @@ import os
 import pandas as pd
 
 # List of user IDs to exclude from email notifications -> see if could implement this dynamically later
-exclude_user_ids = [87002]
+exclude_user_ids = [87002, 97461]
 
 # Retry number for attempted API calls and such
 MAX_RETRIES = 3
@@ -101,6 +101,7 @@ def main_process(start_date: str, end_date: str, work_week_dates: List[str]):
             print(f"Excluding user {user['Id']} from tracking as per exclusion list.")
             continue
 
+        employee_name = user.get('FirstName', "") + " " + user.get('LastName', "")
         employee_df = pd.DataFrame(columns=['Date', 'Duration', 'BilledAmount', 'BillableStatus', 'Notes', 
                                             'ProjectId'])
 
@@ -132,19 +133,29 @@ def main_process(start_date: str, end_date: str, work_week_dates: List[str]):
             notes = timecard.get('Notes', '')
             project_id = timecard.get('ProjectId', '')
             
+            # Before the loop
+            rows_to_add = []
+
+            # Inside your loop
             if timecard_date in work_week_dates:
-                employee_df = employee_df.append({
+                rows_to_add.append({
                     'Date': timecard_date,
                     'Duration': duration,
                     'BilledAmount': billed_amount,
                     'BillableStatus': billable_status,
                     'Notes': notes,
                     'ProjectId': project_id
-                }, ignore_index=True)
+                })
+
+            # After the loop
+            if rows_to_add:
+                employee_df = pd.concat([employee_df, pd.DataFrame(rows_to_add)], ignore_index=True)
 
         # Save the dataframe to an Excel file, creating a new sheet for each user
-        with pd.ExcelWriter(OUTPUT_FILE, mode='a', if_sheet_exists='replace') as writer:
-            employee_df.to_excel(writer, sheet_name=f"User_{user['Id']}", index=False)
+        with pd.ExcelWriter(OUTPUT_FILE, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+            employee_df.to_excel(writer, sheet_name=f"{user['Id']}_{employee_name}", index=False)
+
+    print(f"Process completed. Timecards for {len(firm_users) - len(failed_users)} users retrieved successfully.")
 
 def main():
     while True:
