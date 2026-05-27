@@ -221,6 +221,7 @@ supabase_test.py
 firm_users.csv
 artifacts/*
 timesolv_timecards*
+client_project_data.xlsx
 
 # Excluded files
 !status.log
