@@ -180,3 +180,103 @@ class TimeSolvAPI:
             page_number += 1
 
         return timecard_list
+
+    def get_project_details(self) -> List[Dict] | str:
+        """Fetch project details from TimeSolv.
+
+        Returns:
+        - A list of dictionaries containing project details.
+        """
+
+        url = 'https://apps.timesolv.com/Services/rest/oauth2v1/projectSearch'
+        page_size = 100
+        page_number = 1
+        project_list = []
+
+        while True:
+            payload = {
+                "OrderBy": "Id",
+                "SortOrderAscending": 1,
+                "PageSize": page_size,
+                "PageNumber": page_number,
+                "Criteria": [
+                    {
+                        "FieldName": "Id",
+                        "Operator": "IS NOT NULL",
+                        "Value": ""
+                    }
+                ]
+            }
+
+            response = requests.post(url, headers=self.headers, json=payload)
+
+            if response.status_code != 200:
+                return f"Error: HTTP {response.status_code} - {response.text}"
+
+            response_data = response.json()
+            
+            if response_data.get("Status", {}).get("ResponseCode") != 200:
+                error_message = response_data.get("Status", {}).get("Message", "Unknown error")
+                return f"Error: {response_data['Status']['ResponseCode']} - {error_message}"
+
+            projects = response_data.get("Projects", [])
+            if not projects:
+                break
+
+            project_list.extend(projects)
+            if len(projects) < page_size:
+                break
+
+            page_number += 1
+
+        return project_list
+
+    def get_client_details(self) -> List[Dict] | str:
+        """Fetch client details from TimeSolv.
+
+        Returns:
+        - A list of dictionaries containing client details.
+        """
+
+        url = 'https://apps.timesolv.com/Services/rest/oauth2v1/clientSearch'
+        page_size = 100
+        page_number = 1
+        client_list = []
+
+        while True:
+            payload = {
+                "OrderBy": "Id",
+                "SortOrderAscending": 1,
+                "PageSize": page_size,
+                "PageNumber": page_number,
+                "Criteria": [
+                    {
+                        "FieldName": "Id",
+                        "Operator": "IS NOT NULL",
+                        "Value": ""
+                    }
+                ]
+            }
+
+            response = requests.post(url, headers=self.headers, json=payload)
+
+            if response.status_code != 200:
+                return f"Error: HTTP {response.status_code} - {response.text}"
+
+            response_data = response.json()
+            
+            if response_data.get("Status", {}).get("ResponseCode") != 200:
+                error_message = response_data.get("Status", {}).get("Message", "Unknown error")
+                return f"Error: {response_data['Status']['ResponseCode']} - {error_message}"
+
+            clients = response_data.get("Clients", [])
+            if not clients:
+                break
+
+            client_list.extend(clients)
+            if len(clients) < page_size:
+                break
+
+            page_number += 1
+
+        return client_list
