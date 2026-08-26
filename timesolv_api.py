@@ -57,22 +57,19 @@ class TimeSolvAPI:
 
     def get_all_firm_users(self) -> List[Dict] | str:
         """
-        Fetch all users associated with the firm.
-        
+        Fetch all active users associated with the firm.
+
         Returns:
         - A list of dictionaries containing user details.
-        - Error code as string if the request fails.
+        - Error string if the request fails.
         """
 
         url = 'https://apps.timesolv.com/Services/rest/oauth2v1/firmUserSearch'
-
         firm_list = []
         page_size = 100
         page_number = 1
 
-        # Loop to go thru pages
         while True:
-            # Payload to fetch active users
             payload = {
                 "OrderBy": "Id",
                 "SortOrderAscending": 0,
@@ -87,26 +84,21 @@ class TimeSolvAPI:
                 ]
             }
 
-            # Make the request
             response = requests.post(url, headers=self.headers, json=payload)
 
-            # Check HTTP errors
             if response.status_code != 200:
                 return f"Error: HTTP {response.status_code} - {response.text}"
             
             response_data = response.json()
 
-            # Check API response status
             if response_data.get("Status", {}).get("ResponseCode") != 200:
                 error_message = response_data.get("Status", {}).get("Message", "Unknown error")
                 return f"Error: {response_data['Status']['ResponseCode']} - {error_message}"
 
-            # Extract user information
             users = response_data.get("FirmUsers", [])
             if not users:
                 break
 
-            # Append users to firm list
             firm_list.extend(users)
 
             if len(users) < page_size:
@@ -117,19 +109,20 @@ class TimeSolvAPI:
         return firm_list
 
     def search_timecards(self, start_date: str, end_date: str, firm_user_id: int) -> List[Dict] | str:
-        """Search for timecards within the specified date range.
+        """Search for timecards for a specific user within a date range.
 
         Args:
-        - start_date (str): The start date for the search (YYYY-MM-DD).
-        - end_date (str): The end date for the search (YYYY-MM-DD).
-        - firm_user_id (int): The ID of the firm user whose timecards are to be searched.
+        - start_date (str): Start date in YYYY-MM-DD format.
+        - end_date (str): End date in YYYY-MM-DD format.
+        - firm_user_id (int): The ID of the firm user to search timecards for.
 
         Returns:
         - A list of dictionaries containing timecard details.
+        - Error string if the request fails.
         """
 
         url = 'https://apps.timesolv.com/Services/rest/oauth2v1/timecardSearch'
-        page_size = 100
+        page_size = 1000
         page_number = 1
         timecard_list = []
 
@@ -182,14 +175,15 @@ class TimeSolvAPI:
         return timecard_list
 
     def get_project_details(self) -> List[Dict] | str:
-        """Fetch project details from TimeSolv.
+        """Fetch all project details (ProjectName, external ProjectId, etc.).
 
         Returns:
         - A list of dictionaries containing project details.
+        - Error string if the request fails.
         """
 
         url = 'https://apps.timesolv.com/Services/rest/oauth2v1/projectSearch'
-        page_size = 100
+        page_size = 200
         page_number = 1
         project_list = []
 
@@ -199,13 +193,6 @@ class TimeSolvAPI:
                 "SortOrderAscending": 1,
                 "PageSize": page_size,
                 "PageNumber": page_number,
-                "Criteria": [
-                    {
-                        "FieldName": "Id",
-                        "Operator": "IS NOT NULL",
-                        "Value": ""
-                    }
-                ]
             }
 
             response = requests.post(url, headers=self.headers, json=payload)
@@ -231,15 +218,62 @@ class TimeSolvAPI:
 
         return project_list
 
+    def get_project_summaries(self) -> List[Dict] | str:
+        """
+        Fetch project summaries (includes InvoiceBalance and ClientProjectId per project).
+
+        Returns:
+        - A list of dictionaries containing project summary details.
+        - Error string if the request fails.
+        """
+
+        url = "https://apps.timesolv.com/Services/rest/oauth2v1/projectSummary"
+        project_summaries_list = []
+        page_size = 200
+        page_number = 1
+
+        while True:
+            payload = {
+                "OrderBy": "",
+                "SortOrderAscending": 0,
+                "PageSize": page_size,
+                "PageNumber": page_number,
+            }
+
+            response = requests.post(url, headers=self.headers, json=payload)
+
+            if response.status_code != 200:
+                return f"Error: HTTP {response.status_code} - {response.text}"
+
+            response_data = response.json()
+
+            if response_data.get("Status", {}).get("ResponseCode") != 200:
+                error_message = response_data.get("Status", {}).get("Message", "Unknown error")
+                return f"Error: {response_data['Status']['ResponseCode']} - {error_message}"
+
+            project_summaries = response_data.get("ProjectSummaries", [])
+            if not project_summaries:
+                break
+
+            project_summaries_list.extend(project_summaries)
+
+            if len(project_summaries) < page_size:
+                break
+
+            page_number += 1
+
+        return project_summaries_list
+
     def get_client_details(self) -> List[Dict] | str:
-        """Fetch client details from TimeSolv.
+        """Fetch all client details from TimeSolv.
 
         Returns:
         - A list of dictionaries containing client details.
+        - Error string if the request fails.
         """
 
         url = 'https://apps.timesolv.com/Services/rest/oauth2v1/clientSearch'
-        page_size = 100
+        page_size = 200
         page_number = 1
         client_list = []
 
@@ -249,13 +283,6 @@ class TimeSolvAPI:
                 "SortOrderAscending": 1,
                 "PageSize": page_size,
                 "PageNumber": page_number,
-                "Criteria": [
-                    {
-                        "FieldName": "Id",
-                        "Operator": "IS NOT NULL",
-                        "Value": ""
-                    }
-                ]
             }
 
             response = requests.post(url, headers=self.headers, json=payload)
