@@ -207,8 +207,12 @@ def run(start_date: str, end_date: str):
         )
 
         # Write sheet — 'w' on first user to create the file, 'a' thereafter to append
-        mode = "a" if os.path.exists(OUTPUT_FILE) else "w"
-        with pd.ExcelWriter(OUTPUT_FILE, engine="openpyxl", mode=mode, if_sheet_exists="replace") as writer:
+        if os.path.exists(OUTPUT_FILE):
+            writer_kwargs = {"engine": "openpyxl", "mode": "a", "if_sheet_exists": "replace"}
+        else:
+            writer_kwargs = {"engine": "openpyxl", "mode": "w"}
+
+        with pd.ExcelWriter(OUTPUT_FILE, **writer_kwargs) as writer:
             employee_df.to_excel(writer, sheet_name=sheet_name, index=False)
 
         written_users += 1
